@@ -42,7 +42,7 @@ PointToPointCampusHelper::PointToPointCampusHelper (uint32_t nInner,
   m_inner.Create (nInner);
   m_child.Create (nChild * nInner);
 
-  for (uint32_t i = 0; i < m_inner.GetN (); ++i)
+  for (uint32_t i = 0; i < m_innerNodes.GetN (); ++i)
     {
       NetDeviceContainer ndHub2Inner = hub2InnerHelper.Install (m_hub.Get (0), m_inner.Get (i));
       m_hubDevices.Add (ndHub2Inner.Get (0));
@@ -127,14 +127,13 @@ PointToPointCampusHelper::AssignIpv4Addresses (Ipv4AddressHelper address){
     }
 }
 
-PointToPointCampusHelper::InnerCount(){
+PointToPointCampusHelper::InnerCount() const{
 	return m_inner.GetN ();
 }
 
 
-PointToPointCampusHelper::ChildCount(){
+PointToPointCampusHelper::ChildCount() const{
 	return m_child.GetN ();
 }
-
 
 

@@ -33,7 +33,6 @@ class PointToPointCampusHelper {
 public:
 
 	PointToPointCampusHelper(uint32_t maxInner, uint32_t maxOuter, PointToPointHelper inner, PointToPointHelper outer, Ptr<UniformRandomVariable> rnd);
-
 	/**
    * Create a PointToPointBombHelper in order to easily create
    * bomb topologies using p2p links
@@ -142,24 +141,10 @@ public:
   //  * \param network an IPv6 address representing the network portion
   //  *                of the IPv6 Address
   //  * \param prefix the prefix length
-   
-  // void AssignIpv6Addresses (Ipv6Address network, Ipv6Prefix prefix);
 
-  /**
-   * Sets up the node canvas locations for every node in the star. 
-   * This is needed for use with the animation interface
-   *
-   * \param ulx upper left x value
-   * \param uly upper left y value
-   * \param lrx lower right x value
-   * \param lry lower right y value
-   */
+  uint32_t InnerCount () const;
 
-  uint32_t InnerCount ();
-
-  uint32_t ChildCount ();
-
-
+  uint32_t ChildCount () const;
 
 private:
   NodeContainer          m_hub;             //!< Routers
@@ -171,13 +156,9 @@ private:
   
   Ipv4InterfaceContainer m_hubInterfaces;     //!< IPv4 hub interfaces
   Ipv4InterfaceContainer m_innerInterfaces;    //!< Inner interfaces (IPv4)
-  //Ipv4InterfaceContainer m_innerRouterInterfaces;  //!< Inner router interfaces (IPv4)
   Ipv4InterfaceContainer m_childInterfaces;   //!< Child interfaces (IPv4)
-  //Ipv4InterfaceContainer m_childRouterInterfaces; //!< Child router interfaces (IPv4)
   
   Ipv6InterfaceContainer m_hubInterfaces6;     //!< IPv4 hub interfaces
   Ipv6InterfaceContainer m_innerInterfaces6;   //!< Inner interfaces (IPv6)
-  //Ipv6InterfaceContainer m_innerRouterInterfaces6; //!< Inner router interfaces (IPv6)
   Ipv6InterfaceContainer m_childInterfaces6;  //!< Child interfaces (IPv6)
-  //Ipv6InterfaceContainer m_childRouterInterfaces6;  //!< Child router interfaces (IPv6)
 };
