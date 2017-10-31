@@ -82,12 +82,12 @@ PointToPointCampusHelper::GetHubIpv4Address (uint32_t i) const{
 
 Ipv4Address 
 PointToPointCampusHelper::GetInnerIpv4Address (uint32_t i) const{
-  return m_innerInterfaces.GetAddress (i, 1);
+  return m_innerInterfaces.GetAddress (i);
 }
 
 Ipv4Address 
 PointToPointCampusHelper::GetChildIpv4Address (uint32_t i) const{
-  return m_childInterfaces.GetAddress (i, 1);
+  return m_childInterfaces.GetAddress (i);
 }
 
 Ipv6Address 
@@ -119,8 +119,9 @@ PointToPointCampusHelper::AssignIpv4Addresses (Ipv4AddressHelper address){
   for (uint32_t i = 0; i < m_inner.GetN (); ++i)
     {
       m_hubInterfaces.Add (address.Assign (m_hubDevices.Get (i)));
-      m_innerInterfaces.Add (address.Assign (m_innerDevices.Get (i)));
+      m_innerInterfaces.Add (address.Assign (m_innerDevices.Get (i * (nChild + 1))));
       for (uint32_t j = 0; j < nChild; ++j){
+        m_innerInterfaces.Add (address.Assign (m_innerDevices.Get (i * (nChild + 1) + (j + 1))));
         m_childInterfaces.Add (address.Assign (m_childDevices.Get (i * nChild + j)));
       }
       address.NewNetwork ();
