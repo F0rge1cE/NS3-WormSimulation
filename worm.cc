@@ -1,4 +1,4 @@
-#include "ns3-worm.h"
+#include "worm.h"
 #include "ns3/log.h"
 #include "ns3/address.h"
 #include "ns3/inet-socket-address.h"
@@ -17,6 +17,7 @@
 #include "ns3/udp-socket-factory.h"
 #include "ns3/string.h"
 #include "ns3/pointer.h"
+#include "p2pCampusHelper.h"
 
 NS_LOG_COMPONENT_DEFINE ("ns3-worm");
 
@@ -25,6 +26,8 @@ uint32_t Worm::m_existNodes = 0;
 uint32_t Worm::m_totalNodes = 0;
 uint32_t Worm::m_numConn = 1;
 uint32_t Worm::m_pktSize = 512;
+double Worm::m_chooseLocal = 0.65;、
+double Worm::m_scanRate = 0.2;
 std::vector<int> Worm::m_curInfected;
 
 ns3::TypeId Worm::GetTypeId(void)
@@ -68,6 +71,7 @@ ns3::TypeId Worm::GetTypeId(void)
 Worm::Worm(){
 	m_infected = false;
 	m_connected = false;
+  m_exist = false;
 }
 
 Worm::~Worm(){}
@@ -80,9 +84,14 @@ void Worm::SetPacketSize(uint32_t pktSize){
   m_pktSize = pktSize;
 }
 
-void SetUp(std::string protocol, uint32_t infectionPort){
+void Warm::SetExist(bool nodeExist){
+  m_exist = nodeExist;
+}
+
+void SetUp(std::string protocol, uint32_t infectionPort, uint16_t subnetId){
 	m_protocol = protocol;
 	m_infectionPort = infectionPort;
+  m_subnetId = subnetId;
 	m_typeId = ns3::TypeId::LookupByName(m_protocol);
 
 	// Sink socket
@@ -97,9 +106,47 @@ void SetUp(std::string protocol, uint32_t infectionPort){
     m_onoffSocket = std::vector< ns3::Ptr<ns3::Socket> > (m_numConn);                                                   
 }
 
-ns3::Ipv4Address Worm::generateIP(){
+ns3::Ipv4Address Worm::generateIP(int patternId){
 	// TODO: use diff scan pattern to generate target ips;
-	return ns3::Ipv4Address::GetAny();
+  //patternId: different scanning pattern ID
+  //0: Unifformly Random Scanning
+  //1：Local Prefernce Scanning
+  //2: Sequential Scanning
+  if(patternId == 0){
+    // double min = 1.0;
+    // double max = 8.99;
+    Ptr<UniformRandomVariable> uv = CreateObject<UniformRandomVariable> ();
+
+    double i = uv->GetValue(1.0, 5.0);
+    double j = uv->GetValue(1.0, 9.0);
+    double k = uv->GetValue(1.0, 3.0);
+
+    char buff[13];
+    sprintf(buff, "10.%d.%d.%d", (int)i, (int)j, ((int)(k) * 2 + 1));
+    ns3::Ipv4Address address = ns3::Ipv4Address(buff);
+    return address;
+  }
+  
+  elseif(patternId == 1){
+    Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable> ();
+    double i = (double) m_subnetId;
+    if(uv->GetValue(0.0, 1.0) > m_chooseLocal){
+      while((int) i == m_subnetId){
+        i = uv->GetValue(1.0, 5.0);
+      }
+    }
+    double j = uv->GetValue(1.0, 9.0);
+    double k = uv->GetValue(1.0, 3.0);
+
+    char buff[13];
+    sprintf(buff, "10.%d.%d.%d", (int)i, (int)j, ((int)(k) * 2 + 1));
+    ns3::Ipv4Address address = ns3::Ipv4Address(buff);
+    return address;
+  }
+
+  elseif(patternId == 2){
+    return ns3::Ipv4Address::GetAny();
+  }
 }
 void Worm::Write32 (uint8_t *buffer, const uint32_t data){
   buffer[0] = (data >> 0) & 0xff;
@@ -174,9 +221,12 @@ void Worm::StopSending ()
 // Application Methods
 void Worm::StartApplication(){ 
 	// Called at time specified by Start
-	if (m_infected) {
-	  StartInfectingNodes();
-	}
+  if(m_exist){
+    if (m_infected) {
+      StartInfectingNodes();
+    }
+  }
+	
 }
 
 void Worm::Listen(ns3::Ptr<ns3::Socket> socket)

@@ -23,13 +23,11 @@
  	Worm();
  	~Worm();
 
- 	void SetUp(std::string protocol, uint32_t infectionPort);
+ 	void SetUp(std::string protocol, uint32_t infectionPort, uint16_t subnetId);
 
  	void SetInfected(bool isInfected);
  	
  	ns3::Ipv4Address generateIP(void);
-
-
 
  protected:
  	static uint32_t m_totalInfected;
@@ -37,15 +35,18 @@
  	static uint32_t m_exsitNodes;
  	static uint32_t m_numConn;
  	static uint32_t m_pktSize;
+ 	static double m_chooseLocal;
 
  	static std::std::vector<int> m_curInfected;
 
  	bool m_infected;
  	bool m_connected;
+ 	bool m_exist;
 
  	uint16_t m_infectionPort;
  	uint32_t m_totalBytes;
  	uint32_t m_maxBytes;
+ 	uint16_t m_subnetId;
 
  	std::string m_protocol;
  	std::vector< ns3::Ptr<ns3::Socket> > m_onoffSocket;
@@ -58,6 +59,7 @@
  	ns3::EventId m_startStopEvent;
     ns3::EventId m_sendEvent;
     ns3::DataRate m_cbrRate;    //!< Rate that data is generated
+    double scanRate;
 
  	void Write32 (uint8_t *buffer, const uint32_t data);
     void Read32 (const uint8_t *buffer, uint32_t &data);
