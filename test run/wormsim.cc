@@ -42,7 +42,6 @@
 #include "ns3/stats-module.h"
 
 #include "ns3-worm.h"
-#include "ns3-worm.cc"
 
 
 // ------------ Define worm types    ---------------
