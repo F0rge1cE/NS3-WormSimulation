@@ -67,7 +67,7 @@
 #define NUMCONN        1
 
 // ----------- Simulation settings -------------------
-#define SIMTIME        0.0
+#define SIMTIME        5.0
 #define SEEDVALUE      1
 
 using namespace ns3;

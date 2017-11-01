@@ -90,6 +90,9 @@ protected:
     // static ns3::UniformVariable x;
     // static ns3::UniformVariable y;
 
+    static ns3::Ptr<ns3::UniformRandomVariable> tx;
+    static ns3::Ptr<ns3::UniformRandomVariable> ty;
+
     static double x;
     static double y;
 
