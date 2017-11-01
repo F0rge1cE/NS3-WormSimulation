@@ -1,7 +1,27 @@
 #include <iostream>
 
 #include "p2pCampusHelper.h"
+using namespace ns3;
+/*
+Ipv4Address findCorrectAddress (int i, bool[] IsValidInnerNode, bool[] IsValidChildNode, p2pCampusHelper bomb){
+  if(IsValidInnerNode[i/nChild])
+  {
+    if(IsValidChildNode[i])
+    {
+      return bomb.GetChildIpv4Address(i);
+    }
+    else
+    {
+      return bomb.GetInnerIpv4Address(i / nChild * (nChild + 1) + i % nChild + 1);
+    }
+  }
+  else
+  {
+    return bomb.GetHubIpv4Address(i / nChild);
+  }
 
+}
+*/
 int main(int argc, char** argv) {
 	
 	SeedManager::SetSeed(1);
