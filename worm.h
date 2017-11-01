@@ -23,7 +23,7 @@
  	Worm();
  	~Worm();
 
- 	void SetUp(std::string protocol, uint32_t infectionPort);
+ 	void SetUp(std::string protocol, uint32_t infectionPort, uint16_t subnetId);
 
  	void SetInfected(bool isInfected);
  	
@@ -37,15 +37,18 @@
  	static uint32_t m_exsitNodes;
  	static uint32_t m_numConn;
  	static uint32_t m_pktSize;
+ 	static double m_chooseLocal;
 
  	static std::std::vector<int> m_curInfected;
 
  	bool m_infected;
  	bool m_connected;
+ 	bool m_exist;
 
  	uint16_t m_infectionPort;
  	uint32_t m_totalBytes;
  	uint32_t m_maxBytes;
+ 	uint16_t m_subnetId;
 
  	std::string m_protocol;
  	std::vector< ns3::Ptr<ns3::Socket> > m_onoffSocket;
