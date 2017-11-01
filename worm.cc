@@ -130,7 +130,7 @@ ns3::Ipv4Address Worm::generateIP(int patternId){
     Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable> ();
     double i = (double) m_subnetId;
     if(uv->GetValue(0.0, 1.0) > m_chooseLocal){
-      while(i == (double) m_subnetId){
+      while((int) i == m_subnetId){
         i = uv->GetValue(1.0, 5.0);
       }
     }
@@ -142,7 +142,7 @@ ns3::Ipv4Address Worm::generateIP(int patternId){
     ns3::Ipv4Address address = ns3::Ipv4Address(buff);
     return address;
   }
-  
+
   elseif(patternId == 2){
 
   }
