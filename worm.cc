@@ -1,4 +1,5 @@
-#include "worm.h"
+
+#include "ns3-worm.h"
 #include "ns3/log.h"
 #include "ns3/address.h"
 #include "ns3/inet-socket-address.h"
@@ -17,17 +18,16 @@
 #include "ns3/udp-socket-factory.h"
 #include "ns3/string.h"
 #include "ns3/pointer.h"
-#include "p2pCampusHelper.h"
 
 NS_LOG_COMPONENT_DEFINE ("ns3-worm");
 
+ns3::Ptr<ns3::UniformRandomVariable> Worm::tx = ns3::CreateObject<ns3::UniformRandomVariable> ();
+ns3::Ptr<ns3::UniformRandomVariable> Worm::ty = ns3::CreateObject<ns3::UniformRandomVariable> ();
+
 uint32_t Worm::m_totalInfected = 1;
-uint32_t Worm::m_existNodes = 0;
-uint32_t Worm::m_totalNodes = 0;
-uint32_t Worm::m_numConn = 1;
+uint32_t Worm::m_existNodes = 1;
+
 uint32_t Worm::m_pktSize = 512;
-double Worm::m_chooseLocal = 0.65;、
-double Worm::m_scanRate = 0.2;
 std::vector<int> Worm::m_curInfected;
 
 ns3::TypeId Worm::GetTypeId(void)
@@ -39,10 +39,6 @@ ns3::TypeId Worm::GetTypeId(void)
                    ns3::DataRateValue (ns3::DataRate ("500kb/s")),
                    ns3::MakeDataRateAccessor (&Worm::m_cbrRate),
                    ns3::MakeDataRateChecker ())
-//    .AddAttribute ("PacketSize", "The size of packets sent in on state",
-//                   ns3::UintegerValue (512),
-//                   ns3::MakeUintegerAccessor (&Worm::m_pktSize),
-//                   ns3::MakeUintegerChecker<uint32_t> (1))
     .AddAttribute ("OnTime", "A RandomVariableStream used to pick the duration of the 'On' state.",
                    ns3::StringValue ("ns3::ConstantRandomVariable[Constant=0.5]"),
                    ns3::MakePointerAccessor (&Worm::m_onTime),
@@ -51,104 +47,80 @@ ns3::TypeId Worm::GetTypeId(void)
                    ns3::StringValue ("ns3::ConstantRandomVariable[Constant=0.5]"),
                    ns3::MakePointerAccessor (&Worm::m_offTime),
                    ns3::MakePointerChecker <ns3::RandomVariableStream>())
-    .AddAttribute ("MaxBytes",
-                   "The total number of bytes to send. Once these bytes are sent, "
-                   "no packet is sent again, even in on state. The value zero means "
-                   "that there is no limit.",
-                   ns3::UintegerValue (50000),
-                   ns3::MakeUintegerAccessor (&Worm::m_maxBytes),
-                   ns3::MakeUintegerChecker<uint32_t> ())
-    .AddAttribute ("Protocol", "The type of protocol to use.",
-                   ns3::TypeIdValue (ns3::UdpSocketFactory::GetTypeId ()),
-                   ns3::MakeTypeIdAccessor (&Worm::m_typeId),
-                   ns3::MakeTypeIdChecker ())
     .AddTraceSource ("Tx", "A new packet is created and is sent",
                      ns3::MakeTraceSourceAccessor (&Worm::m_txTrace));
   return tid;
 }
 
+// Constructors
 
-Worm::Worm(){
-	m_infected = false;
-	m_connected = false;
-  m_exist = false;
-}
+Worm::Worm()
+  : m_infected(false),
+    m_vulnerable(true),
+    m_residualBits(0),
+    m_totalBytes(0),
+    m_lastStartTime(ns3::Seconds(0)),
+    m_sinkSocket(0)
+{}
 
 Worm::~Worm(){}
 
-void Worm::SetInfected(bool isInfected){
-  m_infected = isInfected;
+void Worm::SetInfected(bool alreadyInfected){
+  m_infected = alreadyInfected;
+}
+
+void Worm::SetVulnerable(bool vulnerable){
+  m_vulnerable = vulnerable;
+}
+
+void Worm::SetMaxBytes(uint32_t maxBytes){
+  m_maxBytes = maxBytes;
 }
 
 void Worm::SetPacketSize(uint32_t pktSize){
   m_pktSize = pktSize;
 }
 
-void Warm::SetExist(bool nodeExist){
-  m_exist = nodeExist;
+void Worm::SetExistNodes (uint32_t existNodes){
+  m_existNodes = existNodes;
 }
 
-void SetUp(std::string protocol, uint32_t infectionPort, uint16_t subnetId){
-	m_protocol = protocol;
-	m_infectionPort = infectionPort;
-  m_subnetId = subnetId;
-	m_typeId = ns3::TypeId::LookupByName(m_protocol);
-
-	// Sink socket
-	m_sinkSocket = ns3::Socket::CreateSocket(GetNode(), m_typeId);
-	NS_ASSERT(m_sinkSocket != 0);
-	ns3::InetSocketAddress local = ns3::InetSocketAddress(ns3::Ipv4Address::GetAny(), m_infectionPort);
-    m_sinkSocket->Bind(local);
-    m_sinkSocket->Listen();
-    m_sinkSocket->SetRecvCallback(MakeCallback(&Worm::Listen, this));
-    
-    // onoff socket vector
-    m_onoffSocket = std::vector< ns3::Ptr<ns3::Socket> > (m_numConn);                                                   
+uint32_t Worm::GetInfectedNodes (){
+  return m_totalInfected;
 }
 
-ns3::Ipv4Address Worm::generateIP(int patternId){
-	// TODO: use diff scan pattern to generate target ips;
-  //patternId: different scanning pattern ID
-  //0: Unifformly Random Scanning
-  //1：Local Prefernce Scanning
-  //2: Sequential Scanning
-  if(patternId == 0){
-    // double min = 1.0;
-    // double max = 8.99;
-    Ptr<UniformRandomVariable> uv = CreateObject<UniformRandomVariable> ();
+void Worm::SetUp(std::string protocol, uint32_t infectionPort){
+  m_protocol = protocol;
+  m_infectionPort = infectionPort;
+  m_typeId = ns3::TypeId::LookupByName(m_protocol);
 
-    double i = uv->GetValue(1.0, 5.0);
-    double j = uv->GetValue(1.0, 9.0);
-    double k = uv->GetValue(1.0, 3.0);
+  // Sink socket
+  m_sinkSocket = ns3::Socket::CreateSocket (GetNode (), m_typeId);
+  NS_ASSERT (m_sinkSocket != 0);
+  ns3::InetSocketAddress local = ns3::InetSocketAddress(ns3::Ipv4Address::GetAny(),
+                                                        m_infectionPort);
+  m_sinkSocket->Bind(local);
+  m_sinkSocket->Listen();
+  m_sinkSocket->SetRecvCallback (MakeCallback (&Worm::Listen, this));
 
-    char buff[13];
-    sprintf(buff, "10.%d.%d.%d", (int)i, (int)j, ((int)(k) * 2 + 1));
-    ns3::Ipv4Address address = ns3::Ipv4Address(buff);
-    return address;
-  }
-  
-  elseif(patternId == 1){
-    Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable> ();
-    double i = (double) m_subnetId;
-    if(uv->GetValue(0.0, 1.0) > m_chooseLocal){
-      while((int) i == m_subnetId){
-        i = uv->GetValue(1.0, 5.0);
-      }
-    }
-    double j = uv->GetValue(1.0, 9.0);
-    double k = uv->GetValue(1.0, 3.0);
-
-    char buff[13];
-    sprintf(buff, "10.%d.%d.%d", (int)i, (int)j, ((int)(k) * 2 + 1));
-    ns3::Ipv4Address address = ns3::Ipv4Address(buff);
-    return address;
-  }
-
-  elseif(patternId == 2){
-    return ns3::Ipv4Address::GetAny();
-  }
+  // Initialize number of simultaneous connections
+  m_onoffSocket = std::vector< ns3::Ptr<ns3::Socket> > (1);
 }
+
+ns3::Ipv4Address Worm::guessIP(){
+  uint32_t first, second;
+  char buff[13];
+
+  first = Worm::tx->GetInteger(1,32);
+  second = Worm::ty->GetInteger(1,256);
+  sprintf(buff, "192.%d.%d.2",first,second);
+
+  ns3::Ipv4Address address = ns3::Ipv4Address(buff);
+  return address;
+}
+
 void Worm::Write32 (uint8_t *buffer, const uint32_t data){
+  NS_LOG_FUNCTION (this << buffer << data);
   buffer[0] = (data >> 0) & 0xff;
   buffer[1] = (data >> 8) & 0xff;
   buffer[2] = (data >> 16) & 0xff;
@@ -156,82 +128,88 @@ void Worm::Write32 (uint8_t *buffer, const uint32_t data){
 }
 
 void Worm::Read32 (const uint8_t *buffer, uint32_t &data){
+  NS_LOG_FUNCTION (this << buffer << data);
   data = (buffer[3] << 24) + (buffer[2] << 16) + (buffer[1] << 8) + buffer[0];
 }
 
 void Worm::SendPacket(uint32_t index){
-	uint8_t* data = new uint8_t[m_pktSize];
-	for(uint32_t i = 0; i<m_pktSize; i++) data[i] = 0;
+  uint8_t* data = new uint8_t[m_pktSize];
+  for (uint32_t i = 0; i < m_pktSize; ++i) data[i] = 0;
 
-	uint32_t temp = m_infectionPort;
-	Write32(&data[0], temp);
+  uint32_t tmp = m_infectionPort;
+  Write32 (&data[0 * sizeof(uint32_t)], tmp);
 
-	ns3::Ptr<ns3::Packet> packet = ns3::Create<ns3::Packet> ((uint8_t*) data, m_pktSize);
-	m_onoffSocket[index]->SendTo(packet, 0, ns3::InetSocketAddress(generateIP()), m_infectionPort + index);
-	m_totalBytes += m_pktSize;
-	m_lastStartTime = ns3::Simulator::Now();
-	ScheduleNextTx(index);
+  ns3::Ptr<ns3::Packet> packet = ns3::Create<ns3::Packet> ((uint8_t *) data, m_pktSize);
+
+  m_onoffSocket[index]->SendTo(packet, 0,
+                               ns3::InetSocketAddress(guessIP(), m_infectionPort+index));
+
+  //std::cerr << "Test: " << testVal << std::endl;
+  m_totalBytes += m_pktSize;
+  m_lastStartTime = ns3::Simulator::Now();
+  m_residualBits = 0;
+  ScheduleNextTx (index);
 }
 
-void Worm::ConnectionSucceeded(ns3::Ptr<ns3::Socket> socket){
-  NS_LOG_FUNCTION (this << socket);
-  m_connected = true;
-}
-
-void Worm::ConnectionFailed(ns3::Ptr<ns3::Socket> socket){
-  NS_LOG_FUNCTION (this << socket);
-}
-
-void Worm::ScheduleStartEvent (uint32_t index){  // Schedules the event to start sending data (switch to the "On" state)
-  //ns3::Time offInterval = ns3::Seconds (m_offTime->GetValue ());
-  //NS_LOG_LOGIC ("start at " << offInterval);
+void Worm::ScheduleStartEvent (uint32_t index){ 
+ // Schedules the event to start sending data (switch to the "On" state)
+  ns3::Time offInterval = ns3::Seconds (m_offTime->GetValue ());
+  NS_LOG_LOGIC ("start at " << offInterval);
   ns3::Simulator::ScheduleNow(&Worm::StartSending, this, index);
 }
 
-void Worm::ScheduleStopEvent (){  // Schedules the event to stop sending data (switch to "Off" state)
+void Worm::ScheduleStopEvent (){  
+// Schedules the event to stop sending data (switch to "Off" state)
   ns3::Time onInterval = ns3::Seconds (m_onTime->GetValue ());
-  // NS_LOG_LOGIC ("stop at " << onInterval);
+  NS_LOG_LOGIC ("stop at " << onInterval);
   ns3::Simulator::Schedule (onInterval, &Worm::StopSending, this);
 }
 
 // Event handlers
 void Worm::StartSending (uint32_t index){
-  NS_LOG_FUNCTION (this);
   m_lastStartTime = ns3::Simulator::Now ();
   ScheduleNextTx (index);  // Schedule the send packet event
-  //ScheduleStopEvent ();
 }
 
-void Worm::ScheduleNextTx(uint32_t index){
-	NS_LOG_FUNCTION(this);
-	if(m_maxByte == 0 || m_totalBytes < m_maxByte){
-		uint32_t bits = m_pktSize * 8;
-		// How to compute next time?
-		ns3::Time nextTime (ns3::Seconds (bits / static_cast<double>(m_cbrRate.GetBitRate ()))); // Time till next packet
-		m_sendEvent = ns3::Simulator::Schedule(nextTime, &Worm::SendPacket, this, index);
-	}
+// Private helpers
+void Worm::ScheduleNextTx (uint32_t index){
+      uint32_t bits = m_pktSize * 8 - m_residualBits;
+      NS_LOG_LOGIC ("bits = " << bits);
+      ns3::Time nextTime (ns3::Seconds (bits /
+                          static_cast<double>(m_cbrRate.GetBitRate ()))); // Time till next packet
+      NS_LOG_LOGIC ("nextTime = " << nextTime);
+      m_sendEvent = ns3::Simulator::Schedule (nextTime,
+                                         &Worm::SendPacket, this, index);
 }
 
-void Worm::StopSending ()
-{
+void Worm::StopSending (){
+  NS_LOG_FUNCTION (this);
   CancelEvents ();
-  //ScheduleStartEvent ();
+}
+
+void Worm::SetNumInfected(){
+  m_curInfected.push_back(Worm::GetInfectedNodes());
+}
+
+std::vector<int> Worm::GetInfectionArray(){
+    return m_curInfected;
 }
 
 // Application Methods
-void Worm::StartApplication(){ 
-	// Called at time specified by Start
-  if(m_exist){
-    if (m_infected) {
-      StartInfectingNodes();
-    }
+void Worm::StartApplication()    // Called at time specified by Start
+{
+  // If we're vulnerable, if already infected, start infected other nodes
+  // else listen for packets on infection port
+  if (m_vulnerable) {
+      if (m_infected) {
+          StartInfectingNodes();
+      }
   }
-	
 }
 
-void Worm::Listen(ns3::Ptr<ns3::Socket> socket)
-{
-  while (socket->GetRxAvailable () > 0){
+void Worm::Listen(ns3::Ptr<ns3::Socket> socket){
+  while (socket->GetRxAvailable () > 0)
+    {
       ns3::Address from;
       ns3::Ptr<ns3::Packet> p = socket->RecvFrom (0xffffffff, 0, from);
       NS_ASSERT (ns3::InetSocketAddress::IsMatchingType (from));
@@ -242,10 +220,10 @@ void Worm::Listen(ns3::Ptr<ns3::Socket> socket)
       uint32_t pktMsg;
 
       Read32 ((const uint8_t *) &buffer[0], pktMsg);
-
-      for (uint32_t i=0; i < m_numConn; ++i)
-        {
-          if ((((uint32_t)m_infectionPort + i) == pktMsg) && (!m_infected))
+      //std::cerr << "[" << m_name << "] Received one packet!" << std::endl;
+//      for (uint32_t i=0; i < 1; ++i)
+//        {
+          if ((((uint32_t)m_infectionPort) == pktMsg) && (!m_infected))
             {
               m_infected = true;
               m_totalInfected++;
@@ -255,52 +233,73 @@ void Worm::Listen(ns3::Ptr<ns3::Socket> socket)
 
               StartInfectingNodes();
             }
-        }
+//        }
     }
 }
 
+
 void Worm::StartInfectingNodes(){
-  for (uint32_t i = 0; i < m_numConn; ++i){
+//  for (uint32_t i=0; i<1; ++i){
       // OnOff socket
-      m_onoffSocket[i] = ns3::Socket::CreateSocket (GetNode (), m_typeId);
-      NS_ASSERT (m_onoffSocket[i] != 0);
-      m_onoffSocket[i]->Bind();
+      m_onoffSocket[0] = ns3::Socket::CreateSocket (GetNode (), m_typeId);
+      NS_ASSERT (m_onoffSocket[0] != 0);
+      m_onoffSocket[0]->Bind();
 
-      m_onoffSocket[i]->SetAllowBroadcast(false);
-      m_onoffSocket[i]->SetConnectCallback(ns3::MakeCallback(&Worm::ConnectionSucceeded, this),
-                                        ns3::MakeCallback(&Worm::ConnectionFailed, this));
-
+      m_onoffSocket[0]->SetAllowBroadcast(false);
       m_cbrRateFailSafe = m_cbrRate;
-
-      //CancelEvents ();
-
-      ScheduleStartEvent(i);
-    }
+      ScheduleStartEvent(0);
+//    }
 
     ns3::Simulator::Schedule(ns3::Seconds(2.0),&Worm::StartInfectingNodes, this);
 }
 
-void Worm::CancelEvents (){
+void Worm::CancelEvents ()
+{
+  NS_LOG_FUNCTION (this);
+
+  if (m_sendEvent.IsRunning () && m_cbrRateFailSafe == m_cbrRate )
+    { // Cancel the pending send packet event
+      // Calculate residual bits since last packet sent
+      ns3::Time delta (ns3::Simulator::Now () - m_lastStartTime);
+      ns3::int64x64_t bits = delta.To (ns3::Time::S) * m_cbrRate.GetBitRate ();
+      m_residualBits += bits.GetHigh ();
+    }
+  m_cbrRateFailSafe = m_cbrRate;
   ns3::Simulator::Cancel (m_sendEvent);
   ns3::Simulator::Cancel (m_startStopEvent);
 }
 
-void Worm::StopApplication(){
-  // Called at time specified by Stop
+void Worm::StopApplication()     // Called at time specified by Stop
+{
+  //std::cerr << "[" << m_name << "] Stopping Application" << std::endl;
   if (m_sinkSocket != 0) {
       m_sinkSocket->Close();
   }
-  for (uint32_t i=0; i<m_numConn; ++i) {
-      if (m_onoffSocket[i] != 0) {
-          m_onoffSocket[i]->Close();
+//  for (uint32_t i=0; i<1; ++i) {
+      if (m_onoffSocket[0] != 0) {
+          m_onoffSocket[0]->Close();
       }
-  }
+//  }
   ns3::Simulator::Schedule(ns3::Seconds(2.0), &Worm::CloseAndPrint, this);
 }
 
-void Worm::CloseAndPrint(){
-	// TODO: print all data here.
-	std::cerr << " State at time " << ns3::Simulator::Now() << ":\n"
+void Worm::CloseAndPrint()
+{
+
+}
+
+void Worm::DoDispose()
+{
+  m_sinkSocket = 0;
+
+//  for (uint32_t i=0; i<1; ++i)
+    m_onoffSocket[0] = 0;
+  Application::DoDispose();
+}
+
+void Worm::PrintState()
+{
+  std::cerr << "[" << m_name << "] State at time " << ns3::Simulator::Now() << ":\n"
             << "\tInfected: " << (m_infected ? "True\n" : "False\n")
             << "\tVulnerable: " << (m_vulnerable ? "True\n" : "False\n")
             << std::endl;
