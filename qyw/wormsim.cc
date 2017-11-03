@@ -45,7 +45,6 @@
 
 //what I added//////////////////////////////////////////////////
 #include "p2pCampusHelper.h"
-using namespace ns3;
 //////////////////////////////////////////////////////////////////
 
 // ------------ Define worm types    ---------------
@@ -258,12 +257,12 @@ int main(int argc, char* argv[])
   PointToPointHelper hubInner;
   hubInner.SetDeviceAttribute("DataRate", StringValue("100Mbps"));
   hubInner.SetChannelAttribute("Delay", StringValue("5ms"));
-  
+
   PointToPointHelper innerChild;
   innerChild.SetDeviceAttribute("DataRate", StringValue("100Mbps"));
   innerChild.SetChannelAttribute("Delay", StringValue("8ms"));
 
-  p2pCampusHelper bomb(nInner, hubInner, nChild, innerChild);
+  PointToPointCampusHelper bomb(nInner, hubInner, nChild, innerChild);
   InternetStackHelper stack;
   bomb.InstallStack(stack);
   Ipv4AddressHelper address;
@@ -340,7 +339,7 @@ int main(int argc, char* argv[])
         }
       next += fanout2Nodes[i].GetN();
     }
-  
+
   Worm::SetExistNodes(numVulnerableNodes);
   */
 
@@ -370,7 +369,7 @@ int main(int argc, char* argv[])
     wormApp->SetStartTime (Seconds (0.0));
     wormApp->SetStopTime (Seconds (simtime));
 
-    fanout2Nodes[i].Get(j)->AddApplication (wormApp);
+    bomb.GetChildNode(i)->AddApplication (wormApp);
     if (wormtype == TCPWORMTYPE)
       wormApp->SetUp ("ns3::TcpSocketFactory", 5000);
     if (wormtype == UDPWORMTYPE)
@@ -392,13 +391,13 @@ int main(int argc, char* argv[])
     Simulator::Stop(Seconds(simtime));
   Simulator::Run();
 
-  double percInfected = 100.*(double)Worm::GetInfectedNodes() / (double)lastFanout;
-  double percVulnerable = 100.*(double)numVulnerableNodes/(double)lastFanout;
+  double percInfected = 100.*(double)Worm::GetInfectedNodes() / (double)(nChild * nInner);
+  double percVulnerable = 100.*(double)numVulnerableNodes/(double)(nChild * nInner);
   double percInfToVuln = percInfected / percVulnerable;
   cerr << "Time(s)\tInf(#)\tTot(#)\tConn(#)\tPerc(%)\tVuln(%)\tInf/Vul(%)" << std::endl;
   cerr << setprecision(3) << Simulator::Now().GetSeconds() << "\t"
        << Worm::GetInfectedNodes() << "\t"
-       << lastFanout << "\t"
+       << nChild * nInner << "\t"
        << Worm::GetNumConn() << "\t"
        << setprecision(4) << percInfected << "\t"
        << setprecision(4) << percVulnerable << "\t"
@@ -421,7 +420,7 @@ int main(int argc, char* argv[])
   assert(dataFile.is_open());
   dataFile << "0.0" << "\t"
            << Worm::GetInfectedNodes() << "\t"
-           << lastFanout << "\t"
+           << nChild * nInner << "\t"
            << percVulnerable << "\t"
            << percInfected << "\t"
            << Worm::GetNumConn() << "\t"

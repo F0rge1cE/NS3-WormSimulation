@@ -22,6 +22,8 @@
 //// By default we are setting the target vector to be NULL
 //// The code then selects the uniform target vector object by default
 
+using namespace ns3;
+
 //WormTargetVector* Worm::defaultTV = NULL;
 NS_LOG_COMPONENT_DEFINE ("ns3-worm");
 

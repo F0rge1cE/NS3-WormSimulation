@@ -20,13 +20,14 @@
 #include <sstream>
 
 #include "ns3/log.h"
-#include "ns3/point-to-point-star.h"
 #include "ns3/constant-position-mobility-model.h"
 
 #include "ns3/node-list.h"
 #include "ns3/point-to-point-net-device.h"
 #include "ns3/vector.h"
 #include "ns3/ipv6-address-generator.h"
+
+#include "p2pCampusHelper.h"
 
 using namespace ns3;
 
@@ -42,7 +43,7 @@ PointToPointCampusHelper::PointToPointCampusHelper (uint32_t nInner,
   m_inner.Create (nInner);
   m_child.Create (nChild * nInner);
 
-  for (uint32_t i = 0; i < m_innerNodes.GetN (); ++i)
+  for (uint32_t i = 0; i < m_inner.GetN (); ++i)
     {
       NetDeviceContainer ndHub2Inner = hub2InnerHelper.Install (m_hub.Get (0), m_inner.Get (i));
       m_hubDevices.Add (ndHub2Inner.Get (0));
@@ -60,62 +61,62 @@ PointToPointCampusHelper::~PointToPointCampusHelper() {
 
 }
 
-Ptr<Node> 
+Ptr<Node>
 PointToPointCampusHelper::GetHub () const{
   return m_hub.Get (0);
 }
 
-Ptr<Node> 
+Ptr<Node>
 PointToPointCampusHelper::GetInnerNode (uint32_t i) const{
   return m_inner.Get (i);
 }
 
-Ptr<Node> 
+Ptr<Node>
 PointToPointCampusHelper::GetChildNode (uint32_t i) const{
   return m_child.Get (i);
 }
 
-Ipv4Address 
+Ipv4Address
 PointToPointCampusHelper::GetHubIpv4Address (uint32_t i) const{
   return m_hubInterfaces.GetAddress (i);
 }
 
-Ipv4Address 
+Ipv4Address
 PointToPointCampusHelper::GetInnerIpv4Address (uint32_t i) const{
   return m_innerInterfaces.GetAddress (i);
 }
 
-Ipv4Address 
+Ipv4Address
 PointToPointCampusHelper::GetChildIpv4Address (uint32_t i) const{
   return m_childInterfaces.GetAddress (i);
 }
 
-Ipv6Address 
+Ipv6Address
 PointToPointCampusHelper::GetHubIpv6Address (uint32_t i) const{
   return m_hubInterfaces6.GetAddress (i, 1);
 }
 
-Ipv6Address 
+Ipv6Address
 PointToPointCampusHelper::GetInnerIpv6Address (uint32_t i) const{
   return m_innerInterfaces6.GetAddress(i, 1);
 }
 
-Ipv6Address 
+Ipv6Address
 PointToPointCampusHelper::GetChildIpv6Address (uint32_t i) const{
   return m_childInterfaces6.GetAddress(i, 1);
 }
 
-void 
+void
 PointToPointCampusHelper::InstallStack (InternetStackHelper stack){
   stack.Install(m_hub);
   stack.Install(m_inner);
   stack.Install(m_child);
 }
 
-void 
+void
 PointToPointCampusHelper::AssignIpv4Addresses (Ipv4AddressHelper address){
   uint32_t nChild = m_child.GetN () / m_inner.GetN ();
-  
+
   for (uint32_t i = 0; i < m_inner.GetN (); ++i)
     {
       m_hubInterfaces.Add (address.Assign (m_hubDevices.Get (i)));
@@ -128,11 +129,12 @@ PointToPointCampusHelper::AssignIpv4Addresses (Ipv4AddressHelper address){
     }
 }
 
+uint32_t
 PointToPointCampusHelper::InnerCount() const{
 	return m_inner.GetN ();
 }
 
-
+uint32_t
 PointToPointCampusHelper::ChildCount() const{
 	return m_child.GetN ();
 }
