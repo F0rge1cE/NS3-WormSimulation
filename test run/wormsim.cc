@@ -67,7 +67,7 @@
 #define NUMCONN        1
 
 // ----------- Simulation settings -------------------
-#define SIMTIME        5.0
+#define SIMTIME        2.0
 #define SEEDVALUE      1
 
 using namespace ns3;
@@ -75,7 +75,7 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-  uint32_t wormtype = TCPWORMTYPE;
+  uint32_t wormtype = WORMTYPE;
   uint32_t nt = TREES;
   uint32_t nf1 = FANOUT1;
   uint32_t nf2 = FANOUT2;
