@@ -28,6 +28,9 @@ NS_LOG_COMPONENT_DEFINE ("ns3-worm");
 // ns3::UniformVariable Worm::x = ns3::UniformVariable(1.000,33.999);
 // ns3::UniformVariable Worm::y = ns3::UniformVariable(1.000,255.999);
 
+double Worm::x = 22.222;
+double Worm::y = 11.111;
+
 ns3::Ptr<ns3::UniformRandomVariable> Worm::tx = ns3::CreateObject<ns3::UniformRandomVariable> ();
 ns3::Ptr<ns3::UniformRandomVariable> Worm::ty = ns3::CreateObject<ns3::UniformRandomVariable> ();
 uint32_t Worm::m_xInt = 256;
