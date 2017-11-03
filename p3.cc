@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "p2pCampusHelper.h"
+#define VULNERABILITY  1.0
 using namespace ns3;
 
 Ipv4Address findCorrectAddress (int i, bool[] IsValidInnerNode, bool[] IsValidChildNode, p2pCampusHelper bomb){
@@ -17,15 +18,23 @@ Ipv4Address findCorrectAddress (int i, bool[] IsValidInnerNode, bool[] IsValidCh
 }
 
 int main(int argc, char** argv) {
+
+    double vulnerability = VULNERABILITY;
+    
     SeedManager::SetSeed(1);
     uint32_t nInner = 8;
     uint32_t nChild = 2;
     double endTime = 60.0;
 
+    uint32_t numVulnerableNodes = 0;
+
     CommandLine cmd;
     cmd.AddValue("nInner", "Number of inner nodes in each bomb", nInner);
     cmd.AddValue("nChild", "Number of child nodes in each bomb", nChild);
     cmd.Parse(argc, argv);
+
+    //SeedManager::SetSeed ((int) clock());
+    Ptr<UniformRandomVariable> uv = CreateObject<UniformRandomVariable> ();
 
     PointToPointHelper hubInner;
     hubInner.SetDeviceAttribute("DataRate", StringValue("100Mbps"));
@@ -47,6 +56,18 @@ int main(int argc, char** argv) {
     Ipv4AddressHelper address;
     address.SetBase("10.1.1.0", "255.255.255.0");
     bomb.AssignIpv4Addresses(address);
+
+    ApplicationContainer wormApps;
+    for(uint32_t i = 0; i < m_inner.GetN(); ++i){
+      Ptr<Worm> wormApp = CreateObject<Worm>();
+      wormApp.SetMaxByte(50000);
+      if(uv->GetValue(0.0, 1.0) <= vulnerability){
+        wormApp->SetVulnerable(true);
+        numVulnerableNodes ++;
+      }
+
+      if()
+    }
     
 	  std::cout << "Hello" << std::endl; 
 
