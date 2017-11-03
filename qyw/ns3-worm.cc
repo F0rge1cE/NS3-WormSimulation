@@ -220,7 +220,7 @@ ns3::Ipv4Address Worm::guessIP()
   double k = uv->GetValue(1.0, 3.0);
 
   char buff[13];
-  sprintf(buff, "10.%d.%d.%d", (uint32_t)i, (uint32_t)j, ((uint32_t)(k) * 2 + 1));
+  sprintf(buff, "10.%d.%d.%d", (uint32_t)i, (uint32_t)j, ((uint32_t)(k) * 2 + 2));
   ns3::Ipv4Address address = ns3::Ipv4Address(buff);
   return address;
 }

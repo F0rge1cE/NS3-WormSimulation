@@ -375,6 +375,7 @@ int main(int argc, char* argv[])
     if (wormtype == UDPWORMTYPE)
       wormApp->SetUp ("ns3::UdpSocketFactory", 5000);
   }
+  Worm::SetExistNodes(numVulnerableNodes);
 
 /////////////////////////////////////////////////////////////////////
 

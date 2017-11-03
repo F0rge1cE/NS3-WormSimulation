@@ -121,13 +121,24 @@ PointToPointCampusHelper::AssignIpv4Addresses (Ipv4AddressHelper address){
     {
       m_hubInterfaces.Add (address.Assign (m_hubDevices.Get (i)));
       m_innerInterfaces.Add (address.Assign (m_innerDevices.Get (i * (nChild + 1))));
+
+      std::cout << m_hubInterfaces.GetAddress(i) << std::endl;
+      std::cout << m_innerInterfaces.GetAddress(3*i) << std::endl;
+
       for (uint32_t j = 0; j < nChild; ++j){
         m_innerInterfaces.Add (address.Assign (m_innerDevices.Get (i * (nChild + 1) + (j + 1))));
         m_childInterfaces.Add (address.Assign (m_childDevices.Get (i * nChild + j)));
+
+        std::cout << m_innerInterfaces.GetAddress(i*3+j+1) << std::endl;
+        std::cout << m_childInterfaces.GetAddress(i*2 + j) << std::endl;
+
       }
       address.NewNetwork ();
     }
+
 }
+
+
 
 uint32_t
 PointToPointCampusHelper::InnerCount() const{
