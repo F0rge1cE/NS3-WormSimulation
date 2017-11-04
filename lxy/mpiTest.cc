@@ -81,7 +81,7 @@
 #define NUMCONN        1
 
 // ----------- Simulation settings -------------------
-#define SIMTIME        0.2
+#define SIMTIME        5
 #define SEEDVALUE      1
 
 // ****** For MPI
@@ -270,7 +270,7 @@ int main(int argc, char* argv[])
   // Worm::SetX (1 + nInner);
   // Worm::SetY (nInner * nChild);
   // Worm::SetTotalNodes (nInner * nChild);
-  Worm::SetNumConn(numConn);
+  //Worm::SetNumConn(numConn);
   Worm::SetPacketSize(payload);
   uint32_t numVulnerableNodes = 0;
 
@@ -279,7 +279,7 @@ int main(int argc, char* argv[])
     for(uint32_t i=0; i < nChild * nInner; i++)
     {
       Ptr<Worm> wormApp = CreateObject<Worm> ();
-      wormApp->SetMaxBytes(50000);
+      //wormApp->SetMaxBytes(50000);
 
       if (uv->GetValue(0.0, 1.0) <= vulnerability) {
         wormApp->SetVulnerable (true);
@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
     for(uint32_t i=0; i < nChild * nInner; i++)
     {
       Ptr<Worm> wormApp = CreateObject<Worm> ();
-      wormApp->SetMaxBytes(50000);
+      //wormApp->SetMaxBytes(50000);
 
       if (uv->GetValue(0.0, 1.0) <= vulnerability) {
         wormApp->SetVulnerable (true);
@@ -326,7 +326,7 @@ int main(int argc, char* argv[])
   if(systemId == 1){
     for(uint32_t i=0; i < nChild * nInner; i++){
       Ptr<Worm> wormApp = CreateObject<Worm> ();
-      wormApp->SetMaxBytes(50000);
+      //wormApp->SetMaxBytes(50000);
 
       if (uv->GetValue(0.0, 1.0) <= vulnerability) {
         wormApp->SetVulnerable (true);
@@ -347,7 +347,7 @@ int main(int argc, char* argv[])
   if(systemId == 1){
     for(uint32_t i=0; i < nChild * nInner; i++){
       Ptr<Worm> wormApp = CreateObject<Worm> ();
-      wormApp->SetMaxBytes(50000);
+      //wormApp->SetMaxBytes(50000);
 
       if (uv->GetValue(0.0, 1.0) <= vulnerability) {
         wormApp->SetVulnerable (true);
