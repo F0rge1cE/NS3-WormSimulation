@@ -216,6 +216,10 @@ int main(int argc, char* argv[])
   hub2hub_500ms.SetDeviceAttribute("DataRate", StringValue("1Gbps"));
   hub2hub_500ms.SetChannelAttribute("Delay", StringValue("500ms"));
 
+  PointToPointHelper hub2hub_200ms;
+  hub2hub_500ms.SetDeviceAttribute("DataRate", StringValue("1Gbps"));
+  hub2hub_500ms.SetChannelAttribute("Delay", StringValue("200ms"));
+
   // Create nodes
   PointToPointCampusHelper bomb0(nInner, hubInner, nChild, innerChild, 0);
   PointToPointCampusHelper bomb1(nInner, hubInner, nChild, innerChild, 1);
@@ -223,38 +227,44 @@ int main(int argc, char* argv[])
   PointToPointCampusHelper bomb3(nInner, hubInner, nChild, innerChild, 3);
 
   NetDeviceContainer hubDevice;
-  NetDeviceContainer temp = hub2hub_10ms.Install (bomb0.GetHub(), bomb1.GetHub());
-
-
-  NetDeviceContainer temp = hub2hub_100ms.Install (bomb1.GetHub(), bomb2.GetHub());
-
-
-  NetDeviceContainer temp = hub2hub_500ms.Install (bomb2.GetHub(), bomb3.GetHub());
-
-
-  NetDeviceContainer temp = hub2hub_100ms.Install (bomb3.GetHub(), bomb0.GetHub());
-
-
+  NetDeviceContainer hub2hub_dev1 = hub2hub_10ms.Install (bomb0.GetHub(), bomb1.GetHub());
+  NetDeviceContainer hub2hub_dev2 = hub2hub_100ms.Install (bomb1.GetHub(), bomb2.GetHub());
+  NetDeviceContainer hub2hub_dev3 = hub2hub_500ms.Install (bomb2.GetHub(), bomb3.GetHub());
+  NetDeviceContainer hub2hub_dev4 = hub2hub_200ms.Install (bomb3.GetHub(), bomb0.GetHub());
 
   InternetStackHelper stack;
   bomb0.InstallStack(stack);
+  bomb1.InstallStack(stack);
+  bomb2.InstallStack(stack);
+  bomb3.InstallStack(stack);
 
   Ipv4AddressHelper address;
   address.SetBase("10.1.1.0", "255.255.255.0");
   bomb0.AssignIpv4Addresses(address);
 
-  bomb1.InstallStack(stack);
+  // bomb1.InstallStack(stack);
   address.SetBase("10.2.1.0", "255.255.255.0");
   bomb1.AssignIpv4Addresses(address);
 
-  bomb2.InstallStack(stack);
+  // bomb2.InstallStack(stack);
   address.SetBase("10.3.1.0", "255.255.255.0");
   bomb2.AssignIpv4Addresses(address);
 
-  bomb3.InstallStack(stack);
+  // bomb3.InstallStack(stack);
   address.SetBase("10.4.1.0", "255.255.255.0");
   bomb3.AssignIpv4Addresses(address);
 
+  address.SetBase("11.1.1.0", "255.255.255.0");
+  Ipv4InterfaceContainer hub2hub_inter1 = hub2hub_dev1.AssignIpv4Addresses(address);
+
+  address.SetBase("12.4.1.0", "255.255.255.0");
+  pv4InterfaceContainer hub2hub_inter2 = hub2hub_dev2.AssignIpv4Addresses(address);
+
+  address.SetBase("13.1.1.0", "255.255.255.0");
+  pv4InterfaceContainer hub2hub_inter3 = hub2hub_dev3.AssignIpv4Addresses(address);
+
+  address.SetBase("14.4.1.0", "255.255.255.0");
+  pv4InterfaceContainer hub2hub_inter4 = hub2hub_dev4.AssignIpv4Addresses(address);
 
   // ApplicationContainer wormApps; // ???
   // Worm::SetX (1 + nInner);
