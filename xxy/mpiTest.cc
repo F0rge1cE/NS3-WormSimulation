@@ -81,7 +81,7 @@
 #define NUMCONN        1
 
 // ----------- Simulation settings -------------------
-#define SIMTIME        0.2
+#define SIMTIME        5
 #define SEEDVALUE      1
 
 // ****** For MPI
@@ -160,12 +160,12 @@ int main(int argc, char* argv[])
 
   // ****** For MPI
   // Distributed simulation setup; by default use granted time window algorithm.
-  if(nullmsg) 
+  if(nullmsg)
     {
       GlobalValue::Bind ("SimulatorImplementationType",
                          StringValue ("ns3::NullMessageSimulatorImpl"));
-    } 
-  else 
+    }
+  else
     {
       GlobalValue::Bind ("SimulatorImplementationType",
                          StringValue ("ns3::DistributedSimulatorImpl"));
@@ -181,9 +181,9 @@ int main(int argc, char* argv[])
   uint32_t systemCount = MpiInterface::GetSize ();
 
   // We only do simulation with 4 processors.
-  if (systemCount != 4)
+  if (systemCount != 1 && systemCount != 2 && systemCount != 4)
     {
-      std::cout << "Only 4 processors are accepted. Now have " << systemCount << std::endl;
+      std::cout << "Only 1, 2 or 4 processors are accepted. Now have " << systemCount << std::endl;
       return 1;
     }
   // ******
@@ -203,7 +203,7 @@ int main(int argc, char* argv[])
   innerChild.SetChannelAttribute("Delay", StringValue("8ms"));
 
   // ****** For MPI
-  // P2P between hubs 
+  // P2P between hubs
   PointToPointHelper hub2hub_10ms;
   hub2hub_10ms.SetDeviceAttribute("DataRate", StringValue("1Gbps"));
   hub2hub_10ms.SetChannelAttribute("Delay", StringValue("10ms"));
@@ -221,10 +221,10 @@ int main(int argc, char* argv[])
   hub2hub_500ms.SetChannelAttribute("Delay", StringValue("200ms"));
 
   // Create nodes
-  PointToPointCampusHelper bomb0(nInner, hubInner, nChild, innerChild, 0);
-  PointToPointCampusHelper bomb1(nInner, hubInner, nChild, innerChild, 1);
-  PointToPointCampusHelper bomb2(nInner, hubInner, nChild, innerChild, 2);
-  PointToPointCampusHelper bomb3(nInner, hubInner, nChild, innerChild, 3);
+  PointToPointCampusHelper bomb0(nInner, hubInner, nChild, innerChild, 0%systemCount);
+  PointToPointCampusHelper bomb1(nInner, hubInner, nChild, innerChild, 1%systemCount);
+  PointToPointCampusHelper bomb2(nInner, hubInner, nChild, innerChild, 2%systemCount);
+  PointToPointCampusHelper bomb3(nInner, hubInner, nChild, innerChild, 3%systemCount);
 
   NetDeviceContainer hubDevice;
   NetDeviceContainer hub2hub_dev1 = hub2hub_10ms.Install (bomb0.GetHub(), bomb1.GetHub());
@@ -233,10 +233,21 @@ int main(int argc, char* argv[])
   NetDeviceContainer hub2hub_dev4 = hub2hub_200ms.Install (bomb3.GetHub(), bomb0.GetHub());
 
   InternetStackHelper stack;
+  // Apply Nix Vector
+  if (nix)
+    {
+      std::cout << "Nix Vector Enabled " << std::endl;
+      Ipv4NixVectorHelper nixRouting;
+      stack.SetRoutingHelper (nixRouting); // has effect on the next Install ()
+    }
+
+  // stack.InstallAll ();
+
   bomb0.InstallStack(stack);
   bomb1.InstallStack(stack);
   bomb2.InstallStack(stack);
   bomb3.InstallStack(stack);
+
 
   Ipv4AddressHelper address;
   address.SetBase("10.1.1.0", "255.255.255.0");
@@ -255,122 +266,115 @@ int main(int argc, char* argv[])
   bomb3.AssignIpv4Addresses(address);
 
   address.SetBase("11.1.1.0", "255.255.255.0");
-  Ipv4InterfaceContainer hub2hub_inter1 = hub2hub_dev1.AssignIpv4Addresses(address);
+  Ipv4InterfaceContainer hub2hub_inter1 = address.Assign(hub2hub_dev1);
 
   address.SetBase("12.4.1.0", "255.255.255.0");
-  Ipv4InterfaceContainer hub2hub_inter2 = hub2hub_dev2.AssignIpv4Addresses(address);
+  Ipv4InterfaceContainer hub2hub_inter2 = address.Assign(hub2hub_dev2);
 
   address.SetBase("13.1.1.0", "255.255.255.0");
-  Ipv4InterfaceContainer hub2hub_inter3 = hub2hub_dev3.AssignIpv4Addresses(address);
+  Ipv4InterfaceContainer hub2hub_inter3 = address.Assign(hub2hub_dev3);
 
   address.SetBase("14.4.1.0", "255.255.255.0");
-  Ipv4InterfaceContainer hub2hub_inter4 = hub2hub_dev4.AssignIpv4Addresses(address);
+  Ipv4InterfaceContainer hub2hub_inter4 = address.Assign(hub2hub_dev4);
 
   // ApplicationContainer wormApps; // ???
   // Worm::SetX (1 + nInner);
   // Worm::SetY (nInner * nChild);
   // Worm::SetTotalNodes (nInner * nChild);
-  Worm::SetNumConn(numConn);
+  //Worm::SetNumConn(numConn);
   Worm::SetPacketSize(payload);
   uint32_t numVulnerableNodes = 0;
 
   // Add the worm application to each node.
-  for(uint32_t i=0; i < nChild * nInner; i++)
-  {
-    Ptr<Worm> wormApp = CreateObject<Worm> ();
-    wormApp->SetMaxBytes(50000);
-
-    if (uv->GetValue(0.0, 1.0) <= vulnerability) {
-      wormApp->SetVulnerable (true);
-      numVulnerableNodes++;
-    }
-
-    wormApp->SetName(std::to_string(i));
-
-    // Set the initial infected node.
-    if(i==0 && numCore==0){
-      wormApp -> SetInfected (true);
-    }
-
-    wormApp->SetStartTime (Seconds (0.0));
-    wormApp->SetStopTime (Seconds (simtime));
-
-    bomb0.GetChildNode(i)->AddApplication (wormApp);
-    wormApp->SetUp ("ns3::UdpSocketFactory", 5000);
-  }
-
-  for(uint32_t i=0; i < nChild * nInner; i++)
-  {
-    Ptr<Worm> wormApp = CreateObject<Worm> ();
-    wormApp->SetMaxBytes(50000);
-
-    if (uv->GetValue(0.0, 1.0) <= vulnerability) {
-      wormApp->SetVulnerable (true);
-      numVulnerableNodes++;
-    }
-
-    wormApp->SetName(std::to_string(i));
-
-    // Set the initial infected node.
-    if(i==0 && numCore==0){
-      wormApp -> SetInfected (true);
-    }
-
-    wormApp->SetStartTime (Seconds (0.0));
-    wormApp->SetStopTime (Seconds (simtime));
-
-    bomb1.GetChildNode(i)->AddApplication (wormApp);
-    wormApp->SetUp ("ns3::UdpSocketFactory", 5000);
-  }
-
+  if(systemId == 0%systemCount){
     for(uint32_t i=0; i < nChild * nInner; i++)
-  {
-    Ptr<Worm> wormApp = CreateObject<Worm> ();
-    wormApp->SetMaxBytes(50000);
+    {
+      Ptr<Worm> wormApp = CreateObject<Worm> ();
+      //wormApp->SetMaxBytes(50000);
 
-    if (uv->GetValue(0.0, 1.0) <= vulnerability) {
-      wormApp->SetVulnerable (true);
-      numVulnerableNodes++;
+      if (uv->GetValue(0.0, 1.0) <= vulnerability) {
+        wormApp->SetVulnerable (true);
+        numVulnerableNodes++;
+      }
+
+      wormApp->SetName(std::to_string(i));
+
+      // Set the initial infected node.
+      if(i==0){
+        wormApp -> SetInfected (true);
+      }
+
+      wormApp->SetStartTime (Seconds (0.0));
+      wormApp->SetStopTime (Seconds (simtime));
+
+      bomb0.GetChildNode(i)->AddApplication (wormApp);
+      wormApp->SetUp ("ns3::UdpSocketFactory", 5000);
     }
-
-    wormApp->SetName(std::to_string(i));
-
-    // Set the initial infected node.
-    if(i==0 && numCore==0){
-      wormApp -> SetInfected (true);
-    }
-
-    wormApp->SetStartTime (Seconds (0.0));
-    wormApp->SetStopTime (Seconds (simtime));
-
-    bomb2.GetChildNode(i)->AddApplication (wormApp);
-    wormApp->SetUp ("ns3::UdpSocketFactory", 5000);
   }
 
+  if(systemId == 1%systemCount){
     for(uint32_t i=0; i < nChild * nInner; i++)
-  {
-    Ptr<Worm> wormApp = CreateObject<Worm> ();
-    wormApp->SetMaxBytes(50000);
+    {
+      Ptr<Worm> wormApp = CreateObject<Worm> ();
+      //wormApp->SetMaxBytes(50000);
 
-    if (uv->GetValue(0.0, 1.0) <= vulnerability) {
-      wormApp->SetVulnerable (true);
-      numVulnerableNodes++;
+      if (uv->GetValue(0.0, 1.0) <= vulnerability) {
+        wormApp->SetVulnerable (true);
+        numVulnerableNodes++;
+      }
+
+      wormApp->SetName(std::to_string(i));
+
+
+      wormApp->SetStartTime (Seconds (0.0));
+      wormApp->SetStopTime (Seconds (simtime));
+
+      bomb1.GetChildNode(i)->AddApplication (wormApp);
+      wormApp->SetUp ("ns3::UdpSocketFactory", 5000);
     }
-
-    wormApp->SetName(std::to_string(i));
-
-    // Set the initial infected node.
-    if(i==0 && numCore==0){
-      wormApp -> SetInfected (true);
-    }
-
-    wormApp->SetStartTime (Seconds (0.0));
-    wormApp->SetStopTime (Seconds (simtime));
-
-    bomb3.GetChildNode(i)->AddApplication (wormApp);
-    wormApp->SetUp ("ns3::UdpSocketFactory", 5000);
   }
 
+  if(systemId == 2%systemCount){
+    for(uint32_t i=0; i < nChild * nInner; i++){
+      Ptr<Worm> wormApp = CreateObject<Worm> ();
+      //wormApp->SetMaxBytes(50000);
+
+      if (uv->GetValue(0.0, 1.0) <= vulnerability) {
+        wormApp->SetVulnerable (true);
+        numVulnerableNodes++;
+      }
+
+      wormApp->SetName(std::to_string(i));
+
+
+      wormApp->SetStartTime (Seconds (0.0));
+      wormApp->SetStopTime (Seconds (simtime));
+
+      bomb2.GetChildNode(i)->AddApplication (wormApp);
+      wormApp->SetUp ("ns3::UdpSocketFactory", 5000);
+    }
+  }
+
+  if(systemId == 3%systemCount){
+    for(uint32_t i=0; i < nChild * nInner; i++){
+      Ptr<Worm> wormApp = CreateObject<Worm> ();
+      //wormApp->SetMaxBytes(50000);
+
+      if (uv->GetValue(0.0, 1.0) <= vulnerability) {
+        wormApp->SetVulnerable (true);
+        numVulnerableNodes++;
+      }
+
+      wormApp->SetName(std::to_string(i));
+
+
+      wormApp->SetStartTime (Seconds (0.0));
+      wormApp->SetStopTime (Seconds (simtime));
+
+      bomb3.GetChildNode(i)->AddApplication (wormApp);
+      wormApp->SetUp ("ns3::UdpSocketFactory", 5000);
+    }
+  }
     Worm::SetExistNodes(numVulnerableNodes);
 
 /////////////////////////////////////////////////////////////////////
@@ -380,7 +384,12 @@ int main(int argc, char* argv[])
   }
 
   // Populate routing tables.
-  Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
+  if (!nix)
+  {
+    std::cout << "Using IPv4 Routing!" << std::endl;
+    Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
+  }
+  // Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
 
   if (simtime != 0)
     Simulator::Stop(Seconds(simtime));
@@ -439,6 +448,6 @@ int main(int argc, char* argv[])
 #else
   NS_FATAL_ERROR ("Can't use distributed simulator without MPI compiled in");
 #endif
-// ****** 
+// ******
 
 }

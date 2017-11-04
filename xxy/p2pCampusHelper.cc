@@ -38,7 +38,7 @@ PointToPointCampusHelper::PointToPointCampusHelper(uint32_t maxInner, uint32_t m
 PointToPointCampusHelper::PointToPointCampusHelper (uint32_t nInner,
                               PointToPointHelper hub2InnerHelper,
                               uint32_t nChild,
-                              PointToPointHelper inner2ChildHelper
+                              PointToPointHelper inner2ChildHelper,
                               uint32_t systemID){
   m_hub.Create (1, systemID);
   m_inner.Create (nInner, systemID);
@@ -122,7 +122,7 @@ PointToPointCampusHelper::AssignIpv4Addresses (Ipv4AddressHelper address){
     {
       m_hubInterfaces.Add (address.Assign (m_hubDevices.Get (i)));
       m_innerInterfaces.Add (address.Assign (m_innerDevices.Get (i * (nChild + 1))));
-      
+
       address.NewNetwork ();
       std::cout << m_hubInterfaces.GetAddress(i) << std::endl;
       std::cout << m_innerInterfaces.GetAddress(3*i) << std::endl;
