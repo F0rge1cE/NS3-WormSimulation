@@ -247,9 +247,9 @@ ns3::Ipv4Address Worm::guessIP()
 
   else if(m_patternId == 2)
   {
-    i = m_addressForPattern3 / 16 + 1;
-    j = m_addressForPattern3 % 16 / 2 + 1;
-    k = m_addressForPattern3 % 16 % 2 + 1;
+    i = m_addressForPattern3 / 24 + 1;
+    j = m_addressForPattern3 % 24 / 2 + 1;
+    k = m_addressForPattern3 % 24 % 2 + 1;
     m_addressForPattern3++;
   }
 
