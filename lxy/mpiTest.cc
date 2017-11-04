@@ -81,7 +81,7 @@
 #define NUMCONN        1
 
 // ----------- Simulation settings -------------------
-#define SIMTIME        5
+#define SIMTIME        8
 #define SEEDVALUE      1
 
 // ****** For MPI
@@ -91,6 +91,8 @@
 #define TRACING false
 // ******
 
+//
+#define PATTERNID 2
 
 using namespace ns3;
 using namespace std;
@@ -295,9 +297,10 @@ int main(int argc, char* argv[])
 
       wormApp->SetStartTime (Seconds (0.0));
       wormApp->SetStopTime (Seconds (simtime));
+      wormApp->SetPatternId (PATTERNID);
 
       bomb0.GetChildNode(i)->AddApplication (wormApp);
-      wormApp->SetUp ("ns3::UdpSocketFactory", 5000);
+      wormApp->SetUp ("ns3::UdpSocketFactory", 5000, systemId);
     }
   }
 
@@ -319,7 +322,7 @@ int main(int argc, char* argv[])
       wormApp->SetStopTime (Seconds (simtime));
 
       bomb1.GetChildNode(i)->AddApplication (wormApp);
-      wormApp->SetUp ("ns3::UdpSocketFactory", 5000);
+      wormApp->SetUp ("ns3::UdpSocketFactory", 5000, systemId);
     }
   }
 
@@ -340,7 +343,7 @@ int main(int argc, char* argv[])
       wormApp->SetStopTime (Seconds (simtime));
 
       bomb2.GetChildNode(i)->AddApplication (wormApp);
-      wormApp->SetUp ("ns3::UdpSocketFactory", 5000);
+      wormApp->SetUp ("ns3::UdpSocketFactory", 5000, systemId);
     }
   }
 
@@ -361,7 +364,7 @@ int main(int argc, char* argv[])
       wormApp->SetStopTime (Seconds (simtime));
 
       bomb3.GetChildNode(i)->AddApplication (wormApp);
-      wormApp->SetUp ("ns3::UdpSocketFactory", 5000);
+      wormApp->SetUp ("ns3::UdpSocketFactory", 5000, systemId);
     }
   }
     Worm::SetExistNodes(numVulnerableNodes);
