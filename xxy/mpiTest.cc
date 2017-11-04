@@ -258,13 +258,13 @@ int main(int argc, char* argv[])
   Ipv4InterfaceContainer hub2hub_inter1 = hub2hub_dev1.AssignIpv4Addresses(address);
 
   address.SetBase("12.4.1.0", "255.255.255.0");
-  pv4InterfaceContainer hub2hub_inter2 = hub2hub_dev2.AssignIpv4Addresses(address);
+  Ipv4InterfaceContainer hub2hub_inter2 = hub2hub_dev2.AssignIpv4Addresses(address);
 
   address.SetBase("13.1.1.0", "255.255.255.0");
-  pv4InterfaceContainer hub2hub_inter3 = hub2hub_dev3.AssignIpv4Addresses(address);
+  Ipv4InterfaceContainer hub2hub_inter3 = hub2hub_dev3.AssignIpv4Addresses(address);
 
   address.SetBase("14.4.1.0", "255.255.255.0");
-  pv4InterfaceContainer hub2hub_inter4 = hub2hub_dev4.AssignIpv4Addresses(address);
+  Ipv4InterfaceContainer hub2hub_inter4 = hub2hub_dev4.AssignIpv4Addresses(address);
 
   // ApplicationContainer wormApps; // ???
   // Worm::SetX (1 + nInner);
