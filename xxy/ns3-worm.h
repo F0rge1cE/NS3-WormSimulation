@@ -40,6 +40,8 @@ public:
     void SetVulnerable(bool vulnerable);
     void SetName(std::string name);
 
+    void SetTotalNumOfInfected (uint32_t num);
+
     static void SetX (uint32_t xInt);
     static void SetY (uint32_t yInt);
     static void SetTotalNodes (uint32_t totalNodes);

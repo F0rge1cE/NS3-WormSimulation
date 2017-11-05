@@ -37,7 +37,7 @@ ns3::Ptr<ns3::UniformRandomVariable> Worm::tx = ns3::CreateObject<ns3::UniformRa
 ns3::Ptr<ns3::UniformRandomVariable> Worm::ty = ns3::CreateObject<ns3::UniformRandomVariable> ();
 uint32_t Worm::m_xInt = 256;
 uint32_t Worm::m_yInt = 256;
-uint32_t Worm::m_totalInfected = 1;
+uint32_t Worm::m_totalInfected = 0;
 uint32_t Worm::m_existNodes = 0;
 uint32_t Worm::m_totalNodes = 0;
 uint32_t Worm::m_numConn = 1;
@@ -108,6 +108,11 @@ Worm::Worm()
 Worm::~Worm()
 {
   NS_LOG_FUNCTION (this);
+}
+
+// Modified for MPI
+void Worm::SetTotalNumOfInfected (uint32_t num){
+  m_totalInfected = num;
 }
 
 void Worm::SetInfected(bool alreadyInfected)
@@ -230,7 +235,8 @@ ns3::Ipv4Address Worm::guessIP()
   {
     i = uv->GetValue(1.0, 5.0);
     j = uv->GetValue(1.0, 25.0);
-    k = uv->GetValue(1.0, 3.0);
+    // k = uv->GetValue(1.0, 3.0);
+    k = 2;
   }
 
   else if (m_patternId == 1)
@@ -242,14 +248,17 @@ ns3::Ipv4Address Worm::guessIP()
       }
     }
     j = uv->GetValue(1.0, 25.0);
-    k = uv->GetValue(1.0, 3.0);
+    // k = uv->GetValue(1.0, 3.0);
+    k = 2;
   }
 
   else if(m_patternId == 2)
   {
-    i = m_addressForPattern3 / 2 / 24 + 1;
-    j = (m_addressForPattern3 / 2) % 24 + 1;
-    k = m_addressForPattern3 % 2 + 1;
+    // i = m_addressForPattern3 / 2 / 24 + 1;
+    i =  m_addressForPattern3 / 24 + 1;
+    j = (m_addressForPattern3 ) % 24 + 1;
+    // k = m_addressForPattern3 % 2 + 1;
+    k = 2;
     m_addressForPattern3++;
 
     // if(m_addressForPattern3 == 4 * 24)
@@ -258,7 +267,7 @@ ns3::Ipv4Address Worm::guessIP()
 
   char buff[13];
   sprintf(buff, "10.%d.%d.%d", (uint32_t)i, (uint32_t)j, (uint32_t)k);
-  //std::cout << buff << std::endl;
+  // std::cout << "Guess:" << buff << std::endl;
   ns3::Ipv4Address address = ns3::Ipv4Address(buff);
   return address;
 
@@ -422,10 +431,13 @@ void Worm::Listen(ns3::Ptr<ns3::Socket> socket)
             {
               m_infected = true;
               m_totalInfected++;
-              std::cerr << m_totalInfected << " This worked! sort of" << std::endl;
+              std::cerr << m_totalInfected << " (Worm, CPU) = " << m_name << std::endl;
 
               if (m_totalInfected >= m_existNodes)
-              ns3::Simulator::Stop();
+              {
+                // ns3::Simulator::Stop(); // Remove to prevent early-stopping of simulatior!
+              }
+
 
               StartInfectingNodes();
             }

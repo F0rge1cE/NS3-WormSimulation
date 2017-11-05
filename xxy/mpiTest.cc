@@ -299,11 +299,13 @@ int main(int argc, char* argv[])
         numVulnerableNodes++;
       }
 
-      wormApp->SetName(std::to_string(i));
+      std::string temp1 = std::to_string(i) + " " + std::to_string(systemId);
+      wormApp->SetName(temp1);
 
       // Set the initial infected node.
       if(i==0){
         wormApp -> SetInfected (true);
+        wormApp -> SetTotalNumOfInfected(1);
       }
 
       wormApp->SetStartTime (Seconds (0.0));
@@ -326,7 +328,8 @@ int main(int argc, char* argv[])
         numVulnerableNodes++;
       }
 
-      wormApp->SetName(std::to_string(i));
+      std::string temp1 = std::to_string(i) + " " + std::to_string(systemId);
+      wormApp->SetName(temp1);
 
 
       wormApp->SetStartTime (Seconds (0.0));
@@ -347,7 +350,8 @@ int main(int argc, char* argv[])
         numVulnerableNodes++;
       }
 
-      wormApp->SetName(std::to_string(i));
+      std::string temp1 = std::to_string(i) + " " + std::to_string(systemId);
+      wormApp->SetName(temp1);
 
 
       wormApp->SetStartTime (Seconds (0.0));
@@ -368,7 +372,8 @@ int main(int argc, char* argv[])
         numVulnerableNodes++;
       }
 
-      wormApp->SetName(std::to_string(i));
+      std::string temp1 = std::to_string(i) + " " + std::to_string(systemId);
+      wormApp->SetName(temp1);
 
 
       wormApp->SetStartTime (Seconds (0.0));
