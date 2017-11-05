@@ -59,26 +59,26 @@
 
 
 // ------------ Define worm types    ---------------
-#define TCPWORMTYPE  1
+// #define TCPWORMTYPE  1
 #define UDPWORMTYPE  2
 #define WORMTYPE     UDPWORMTYPE
 
 // ------------ Define the topology  ---------------
-#define TREES        4
-#define FANOUT1      8
-#define FANOUT2      16
-#define TREELEGPROB  0.85
+// #define TREES        4
+// #define FANOUT1      8
+// #define FANOUT2      16
+// #define TREELEGPROB  0.85
 
-#define LINKBW       "1Mbps"
-#define HLINKBW      "10Mbps"
-#define BLINKBW      "100Mbps"
+// #define LINKBW       "1Mbps"
+// #define HLINKBW      "10Mbps"
+// #define BLINKBW      "100Mbps"
 
 // ------------ Worm parameters -----------------------
 #define VULNERABILITY  1.0
 #define SCANRATE       100
 #define SCANRANGE      0
 #define PAYLOAD        1000
-#define NUMCONN        1
+// #define NUMCONN        1
 
 // ----------- Simulation settings -------------------
 #define SIMTIME        5
@@ -113,23 +113,23 @@ int main(int argc, char* argv[])
   GlobalValue::Bind ("SimulatorImplementationType",
     StringValue ("ns3::DistributedSimulatorImpl"));
   
-  uint32_t wormtype = WORMTYPE;
-  uint32_t nt = TREES;
-  uint32_t nf1 = FANOUT1;
-  uint32_t nf2 = FANOUT2;
-  string linkbw  = LINKBW;
-  string hlinkbw = HLINKBW;
-  string blinkbw = BLINKBW;
+  // uint32_t wormtype = WORMTYPE;
+  // uint32_t nt = TREES;
+  // uint32_t nf1 = FANOUT1;
+  // uint32_t nf2 = FANOUT2;
+  // string linkbw  = LINKBW;
+  // string hlinkbw = HLINKBW;
+  // string blinkbw = BLINKBW;
   uint32_t scanrate = SCANRATE;
   uint32_t patternId = PATTERNID;
   uint32_t payload = PAYLOAD;
   uint32_t seedValue = SEEDVALUE;
-  uint32_t numConn = NUMCONN;
+  // uint32_t numConn = NUMCONN;
   double vulnerability = VULNERABILITY;
-  double treelegprob = TREELEGPROB;
+  // double treelegprob = TREELEGPROB;
   double simtime = SIMTIME;
   bool logTop = 0;
-  std::string dataFileName = "p4.data";
+  // std::string dataFileName = "p4.data";
 
   // ****** For MPI
   // Default configuration
@@ -139,23 +139,23 @@ int main(int argc, char* argv[])
   // ******
 
   CommandLine cmd;
-  cmd.AddValue ("wormtype",      "Type of worm: UDP or TCP",     wormtype);
-  cmd.AddValue ("trees",         "Number of trees",              nt);
-  cmd.AddValue ("fanout1",       "First fanout of trees",        nf1);
-  cmd.AddValue ("fanout2",       "Second fanout of trees",       nf2);
-  cmd.AddValue ("linkbw",        "Link bandwidth",               linkbw);
-  cmd.AddValue ("hlinkbw",       "HLink bandwidth",              hlinkbw);
-  cmd.AddValue ("blinkbw",       "BLink bandwidth",              blinkbw);
+  // cmd.AddValue ("wormtype",      "Type of worm: UDP or TCP",     wormtype);
+  // cmd.AddValue ("trees",         "Number of trees",              nt);
+  // cmd.AddValue ("fanout1",       "First fanout of trees",        nf1);
+  // cmd.AddValue ("fanout2",       "Second fanout of trees",       nf2);
+  // cmd.AddValue ("linkbw",        "Link bandwidth",               linkbw);
+  // cmd.AddValue ("hlinkbw",       "HLink bandwidth",              hlinkbw);
+  // cmd.AddValue ("blinkbw",       "BLink bandwidth",              blinkbw);
   cmd.AddValue ("scanrate",      "Scan rate",                    scanrate);
   cmd.AddValue ("patternId",      "Pattern Id",                  patternId);
   cmd.AddValue ("payload",       "Payload",                      payload);
   cmd.AddValue ("seedvalue",     "Seed value for RNG",           seedValue);
   cmd.AddValue ("vulnerability", "Vulnerability to infection",   vulnerability);
-  cmd.AddValue ("numConn",       "Number of TCP connections",    numConn);
-  cmd.AddValue ("treelegprob",   "Probability of tree legs",     treelegprob);
+  // cmd.AddValue ("numConn",       "Number of TCP connections",    numConn);
+  // cmd.AddValue ("treelegprob",   "Probability of tree legs",     treelegprob);
   cmd.AddValue ("simtime",       "Simulator time in seconds",    simtime);
   cmd.AddValue ("logTop",        "Display the topology stats",   logTop);
-  cmd.AddValue ("filename",      "Name of output file",          dataFileName);
+  // cmd.AddValue ("filename",      "Name of output file",          dataFileName);
 
   // ****** For MPI
   cmd.AddValue ("nix", "Enable the use of nix-vector or global routing", nix);
@@ -165,15 +165,7 @@ int main(int argc, char* argv[])
 
   cmd.Parse (argc,argv);
 
-  // Set the random number generator
-  SeedManager::SetSeed (seedValue);
-  //SeedManager::SetSeed ((int) clock());
-  Ptr<UniformRandomVariable> uv = CreateObject<UniformRandomVariable> ();
-
-  Config::SetDefault ("ns3::TcpL4Protocol::SocketType", TypeIdValue (TcpNewReno::GetTypeId ()));
-
-  // ****** For MPI
-  // Distributed simulation setup; by default use granted time window algorithm.
+    // Distributed simulation setup; by default use granted time window algorithm.
   if(nullmsg)
     {
       GlobalValue::Bind ("SimulatorImplementationType",
@@ -184,6 +176,25 @@ int main(int argc, char* argv[])
       GlobalValue::Bind ("SimulatorImplementationType",
                          StringValue ("ns3::DistributedSimulatorImpl"));
     }
+  // Set the random number generator
+  SeedManager::SetSeed (seedValue);
+  //SeedManager::SetSeed ((int) clock());
+  Ptr<UniformRandomVariable> uv = CreateObject<UniformRandomVariable> ();
+
+  Config::SetDefault ("ns3::TcpL4Protocol::SocketType", TypeIdValue (TcpNewReno::GetTypeId ()));
+
+  // ****** For MPI
+  // // Distributed simulation setup; by default use granted time window algorithm.
+  // if(nullmsg)
+  //   {
+  //     GlobalValue::Bind ("SimulatorImplementationType",
+  //                        StringValue ("ns3::NullMessageSimulatorImpl"));
+  //   }
+  // else
+  //   {
+  //     GlobalValue::Bind ("SimulatorImplementationType",
+  //                        StringValue ("ns3::DistributedSimulatorImpl"));
+  //   }
 
   // Enable parallel simulator with the command line arguments
   MpiInterface::Enable (&argc, &argv);
@@ -308,11 +319,12 @@ int main(int argc, char* argv[])
 
       if (uv->GetValue(0.0, 1.0) <= vulnerability) {
         wormApp->SetVulnerable (true);
-        numVulnerableNodes++;
+        if(i!=0) numVulnerableNodes++;
       }
 
       std::string temp1 = "a" + std::to_string(i) + " " + std::to_string(systemId);
       wormApp->SetName(temp1);
+      wormApp->SetSysId(systemId);
 
       // Set the initial infected node.
       if(i==0){
@@ -344,6 +356,7 @@ int main(int argc, char* argv[])
 
       std::string temp1 = "b" + std::to_string(i) + " " + std::to_string(systemId);
       wormApp->SetName(temp1);
+      wormApp->SetSysId(systemId);
 
 
       wormApp->SetStartTime (Seconds (0.0));
@@ -366,6 +379,7 @@ int main(int argc, char* argv[])
 
       std::string temp1 = "c" + std::to_string(i) + " " + std::to_string(systemId);
       wormApp->SetName(temp1);
+      wormApp->SetSysId(systemId);
 
 
       wormApp->SetStartTime (Seconds (0.0));
@@ -388,7 +402,7 @@ int main(int argc, char* argv[])
 
       std::string temp1 = "d" + std::to_string(i) + " " + std::to_string(systemId);
       wormApp->SetName(temp1);
-
+      wormApp->SetSysId(systemId);
 
       wormApp->SetStartTime (Seconds (0.0));
       wormApp->SetStopTime (Seconds (simtime));
@@ -403,6 +417,7 @@ int main(int argc, char* argv[])
 
   for (int i = 0; i < 5000; ++i) {
       ns3::Simulator::Schedule(ns3::Seconds((double)i*.1), &Worm::SetNumInfected);
+      ns3::Simulator::Schedule(ns3::Seconds((double)i*.01), &Worm::GetCurrentStatus);
   }
 
   // Populate routing tables.
@@ -421,11 +436,10 @@ int main(int argc, char* argv[])
   double percInfected = 100.*(double)Worm::GetInfectedNodes() / (double)(nChild * nInner);
   double percVulnerable = 100.*(double)numVulnerableNodes/(double)(nChild * nInner);
   double percInfToVuln = percInfected / percVulnerable;
-  cerr << "Time(s)\tInf(#)\tTot(#)\tConn(#)\tPerc(%)\tVuln(%)\tInf/Vul(%)" << std::endl;
+  cerr << "Time(s)\tInf(#)\tTot(#)\tPerc(%)\tVuln(%)\tInf/Vul(%)" << std::endl;
   cerr << setprecision(3) << Simulator::Now().GetSeconds() << "\t"
        << Worm::GetInfectedNodes() << "\t"
        << numVulnerableNodes << "\t"
-       << Worm::GetNumConn() << "\t"
        << setprecision(4) << percInfected << "\t"
        << setprecision(4) << percVulnerable << "\t"
        << setprecision(4) << percInfToVuln*100. << "\t"
@@ -442,24 +456,24 @@ int main(int argc, char* argv[])
   //-------------------------
   //"#Nodes %Vul %Inf #inf #Conn Time"
   // Write results to data file
-  std::ofstream dataFile;
-  dataFile.open(dataFileName.c_str(), std::fstream::out | std::fstream::app);
-  assert(dataFile.is_open());
-  dataFile << "0.0" << "\t"
-           << Worm::GetInfectedNodes() << "\t"
-           << numVulnerableNodes << "\t"
-           << percVulnerable << "\t"
-           << percInfected << "\t"
-           << Worm::GetNumConn() << "\t"
-           << payload << "\t"
-           << "\n";
-  for (size_t i = 0; i < infectionArray.size(); ++i) {
-      dataFile << (float)i*0.1 << "\t"
-               << infectionArray.at(i) << "\t"
-               << "\n";
-  }
-  dataFile  << "\n";
-  dataFile.close();
+  // std::ofstream dataFile;
+  // dataFile.open(dataFileName.c_str(), std::fstream::out | std::fstream::app);
+  // assert(dataFile.is_open());
+  // dataFile << "0.0" << "\t"
+  //          << Worm::GetInfectedNodes() << "\t"
+  //          << numVulnerableNodes << "\t"
+  //          << percVulnerable << "\t"
+  //          << percInfected << "\t"
+  //          << Worm::GetNumConn() << "\t"
+  //          << payload << "\t"
+  //          << "\n";
+  // for (size_t i = 0; i < infectionArray.size(); ++i) {
+  //     dataFile << (float)i*0.1 << "\t"
+  //              << infectionArray.at(i) << "\t"
+  //              << "\n";
+  // }
+  // dataFile  << "\n";
+  // dataFile.close();
   //flowmon->SerializeToXmlFile ("p4.flowmon", false, false);
   Simulator::Destroy();
 

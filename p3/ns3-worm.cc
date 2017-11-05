@@ -39,11 +39,13 @@ NS_LOG_COMPONENT_DEFINE ("ns3-worm");
 // uint32_t Worm::m_yInt = 256;
 uint32_t Worm::m_totalInfected = 0;
 // uint32_t Worm::m_existNodes = 0;
-uint32_t Worm::m_totalNodes = 0;
+// uint32_t Worm::m_totalNodes = 0;
 uint32_t Worm::m_numConn = 1;
-uint32_t Worm::m_pktSize = 512;
+uint32_t Worm::m_pktSize = 5120;
 uint32_t Worm::m_patternId = 0;
 double Worm::m_chooseLocalPercent = 0.65;
+
+uint32_t Worm::m_systemID = 0;
 
 std::vector<int> Worm::m_curInfected;
 
@@ -68,13 +70,13 @@ ns3::TypeId Worm::GetTypeId(void)
                    ns3::StringValue ("ns3::ConstantRandomVariable[Constant=0.5]"),
                    ns3::MakePointerAccessor (&Worm::m_offTime),
                    ns3::MakePointerChecker <ns3::RandomVariableStream>())
-    .AddAttribute ("MaxBytes",
-                   "The total number of bytes to send. Once these bytes are sent, "
-                   "no packet is sent again, even in on state. The value zero means "
-                   "that there is no limit.",
-                   ns3::UintegerValue (50000),
-                   ns3::MakeUintegerAccessor (&Worm::m_maxBytes),
-                   ns3::MakeUintegerChecker<uint32_t> ())
+    // .AddAttribute ("MaxBytes",
+    //                "The total number of bytes to send. Once these bytes are sent, "
+    //                "no packet is sent again, even in on state. The value zero means "
+    //                "that there is no limit.",
+    //                ns3::UintegerValue (50000),
+    //                ns3::MakeUintegerAccessor (&Worm::m_maxBytes),
+    //                ns3::MakeUintegerChecker<uint32_t> ())
     .AddAttribute ("Protocol", "The type of protocol to use.",
                    ns3::TypeIdValue (ns3::UdpSocketFactory::GetTypeId ()),
                    ns3::MakeTypeIdAccessor (&Worm::m_typeId),
@@ -115,6 +117,24 @@ void Worm::SetTotalNumOfInfected (uint32_t num){
   m_totalInfected = num;
 }
 
+uint32_t Worm::GetSysId()
+{
+  return m_systemID;
+}
+
+void Worm::SetSysId(uint32_t id)
+{
+  m_systemID = id;
+}
+
+void Worm::GetCurrentStatus()
+{
+  // std::cout << Worm::GetInfectedNodes() << " Nodes infected @ CPU:" << Worm::m_name << ns3::Simulator::Now() << std::endl;
+  // std::cout << Worm::GetInfectedNodes()<< " Nodes infected @ CPU: " << Worm::GetSysId()<< " Time:" << ns3::Simulator::Now().As(Time::MS) << std::endl;
+  std::cout << Worm::GetInfectedNodes()<< " " << Worm::GetSysId()<< " " << ns3::Simulator::Now().As(Time::MS) << std::endl;
+
+}
+
 void Worm::SetInfected(bool alreadyInfected)
 {
   m_infected = alreadyInfected;
@@ -125,10 +145,10 @@ void Worm::SetVulnerable(bool vulnerable)
   m_vulnerable = vulnerable;
 }
 
-void Worm::SetMaxBytes(uint32_t maxBytes)
-{
-  m_maxBytes = maxBytes;
-}
+// void Worm::SetMaxBytes(uint32_t maxBytes)
+// {
+//   m_maxBytes = maxBytes;
+// }
 
 void Worm::SetPacketSize(uint32_t pktSize)
 {
@@ -150,10 +170,10 @@ void Worm::SetName(std::string name)
 //   m_yInt = yInt;
 // }
 
-void Worm::SetTotalNodes (uint32_t totalNodes)
-{
-  m_totalNodes = totalNodes;
-}
+// void Worm::SetTotalNodes (uint32_t totalNodes)
+// {
+//   m_totalNodes = totalNodes;
+// }
 
 // void Worm::SetExistNodes (uint32_t existNodes)
 // {
@@ -170,10 +190,10 @@ void Worm::SetPatternId (uint32_t patternId)
   m_patternId = patternId;
 }
 
-uint32_t Worm::GetTotalNodes ()
-{
-  return m_totalNodes;
-}
+// uint32_t Worm::GetTotalNodes ()
+// {
+//   return m_totalNodes;
+// }
 
 // uint32_t Worm::GetExistNodes ()
 // {
@@ -431,7 +451,7 @@ void Worm::Listen(ns3::Ptr<ns3::Socket> socket)
             {
               m_infected = true;
               m_totalInfected++;
-              std::cerr << m_totalInfected << " (Worm, CPU) = " << m_name << std::endl;
+              // std::cerr << m_totalInfected << " (Worm, CPU) = " << m_name << std::endl;
 
               // if (m_totalInfected >= m_existNodes)
               // {
