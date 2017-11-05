@@ -41,6 +41,9 @@ public:
     void SetName(std::string name);
 
     void SetTotalNumOfInfected (uint32_t num);
+    static void GetCurrentStatus();
+    static uint32_t GetSysId();
+    static void SetSysId(uint32_t id);
 
     static void SetX (uint32_t xInt);
     static void SetY (uint32_t yInt);
@@ -58,6 +61,8 @@ public:
 
 protected:
     void DoDispose (void);
+
+    static uint32_t m_systemID;
 
     static uint32_t m_totalInfected;
     static uint32_t m_totalNodes;

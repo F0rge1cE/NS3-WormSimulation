@@ -56,7 +56,7 @@
 #include <mpi.h>
 #endif
 // ******
-
+#include "getTime.h"
 
 // ------------ Define worm types    ---------------
 #define TCPWORMTYPE  1
@@ -81,7 +81,7 @@
 #define NUMCONN        1
 
 // ----------- Simulation settings -------------------
-#define SIMTIME        10
+#define SIMTIME        5
 #define SEEDVALUE      1
 
 // ****** For MPI
@@ -99,6 +99,9 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+  std::cout << "Wall clock time(begin): " << get_wall_time() << std::endl;
+  std::cout << "CPU clock time(begin): " << get_cpu_time() << std::endl;
+
 // ****** For MPI
 #ifdef NS3_MPI
 // ******
@@ -301,6 +304,7 @@ int main(int argc, char* argv[])
 
       std::string temp1 = std::to_string(i) + " " + std::to_string(systemId);
       wormApp->SetName(temp1);
+      wormApp->SetSysId(systemId);
 
       // Set the initial infected node.
       if(i==0){
@@ -330,7 +334,7 @@ int main(int argc, char* argv[])
 
       std::string temp1 = std::to_string(i) + " " + std::to_string(systemId);
       wormApp->SetName(temp1);
-
+      wormApp->SetSysId(systemId);
 
       wormApp->SetStartTime (Seconds (0.0));
       wormApp->SetStopTime (Seconds (simtime));
@@ -352,7 +356,7 @@ int main(int argc, char* argv[])
 
       std::string temp1 = std::to_string(i) + " " + std::to_string(systemId);
       wormApp->SetName(temp1);
-
+      wormApp->SetSysId(systemId);
 
       wormApp->SetStartTime (Seconds (0.0));
       wormApp->SetStopTime (Seconds (simtime));
@@ -374,6 +378,7 @@ int main(int argc, char* argv[])
 
       std::string temp1 = std::to_string(i) + " " + std::to_string(systemId);
       wormApp->SetName(temp1);
+      wormApp->SetSysId(systemId);
 
 
       wormApp->SetStartTime (Seconds (0.0));
@@ -387,8 +392,12 @@ int main(int argc, char* argv[])
 
 /////////////////////////////////////////////////////////////////////
 
+// Schedule monitor events.
   for (int i = 0; i < 5000; ++i) {
       ns3::Simulator::Schedule(ns3::Seconds((double)i*.1), &Worm::SetNumInfected);
+
+      // Print worm status every 0.1 second.
+      ns3::Simulator::Schedule(ns3::Seconds((double)i*.1), &Worm::GetCurrentStatus);
   }
 
   // Populate routing tables.

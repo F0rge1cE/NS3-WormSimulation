@@ -45,6 +45,8 @@ uint32_t Worm::m_pktSize = 512;
 uint32_t Worm::m_patternId = 0;
 double Worm::m_chooseLocalPercent = 0.65;
 
+uint32_t Worm::m_systemID = 0;
+
 std::vector<int> Worm::m_curInfected;
 
 ns3::TypeId Worm::GetTypeId(void)
@@ -113,6 +115,23 @@ Worm::~Worm()
 // Modified for MPI
 void Worm::SetTotalNumOfInfected (uint32_t num){
   m_totalInfected = num;
+}
+
+uint32_t Worm::GetSysId()
+{
+  return m_systemID;
+}
+
+void Worm::SetSysId(uint32_t id)
+{
+  m_systemID = id;
+}
+
+void Worm::GetCurrentStatus()
+{
+  // std::cout << Worm::GetInfectedNodes() << " Nodes infected @ CPU:" << Worm::m_name << ns3::Simulator::Now() << std::endl;
+  std::cout << Worm::GetInfectedNodes()<< " Nodes infected @ CPU: " << Worm::GetSysId()<< " Time:" << ns3::Simulator::Now() << std::endl;
+
 }
 
 void Worm::SetInfected(bool alreadyInfected)
@@ -384,9 +403,14 @@ void Worm::StopSending ()
   //ScheduleStartEvent ();
 }
 
+
+
 void Worm::SetNumInfected()
 {
-        m_curInfected.push_back(Worm::GetInfectedNodes());
+  m_curInfected.push_back(Worm::GetInfectedNodes());
+
+  // std::cout << m_totalInfected << " Nodes infected @ CPU:" << m_name << ns3::Simulator::Now() << std::endl;
+
 }
 
 std::vector<int> Worm::GetInfectionArray()
