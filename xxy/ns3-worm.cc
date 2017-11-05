@@ -42,6 +42,9 @@ uint32_t Worm::m_existNodes = 0;
 uint32_t Worm::m_totalNodes = 0;
 uint32_t Worm::m_numConn = 1;
 uint32_t Worm::m_pktSize = 512;
+uint32_t Worm::m_patternId = 0;
+double Worm::m_chooseLocalPercent = 0.65;
+
 std::vector<int> Worm::m_curInfected;
 
 ns3::TypeId Worm::GetTypeId(void)
@@ -89,6 +92,7 @@ Worm::Worm()
     m_connected(false),
     m_residualBits(0),
     m_totalBytes(0),
+    m_addressForPattern3(0),
     m_lastStartTime(ns3::Seconds(0)),
     m_sinkSocket(0)
 {
@@ -156,6 +160,11 @@ void Worm::SetNumConn (uint32_t numConn)
   m_numConn = numConn;
 }
 
+void Worm::SetPatternId (uint32_t patternId)
+{
+  m_patternId = patternId;
+}
+
 uint32_t Worm::GetTotalNodes ()
 {
   return m_totalNodes;
@@ -176,10 +185,11 @@ uint32_t Worm::GetNumConn ()
   return m_numConn;
 }
 
-void Worm::SetUp(std::string protocol, uint32_t infectionPort)
+void Worm::SetUp(std::string protocol, uint32_t infectionPort,uint32_t subnetId)
 {
   m_protocol = protocol;
   m_infectionPort = infectionPort;
+  m_subnetId = subnetId;
   m_typeId = ns3::TypeId::LookupByName(m_protocol);
 
   // Sink socket
@@ -215,15 +225,43 @@ ns3::Ipv4Address Worm::guessIP()
   //what I added
   Ptr<UniformRandomVariable> uv = CreateObject<UniformRandomVariable> ();
 
-  double i = uv->GetValue(1.0, 5.0);
-  double j = uv->GetValue(1.0, 25.0);
-  double k = uv->GetValue(1.0, 3.0);
+  double i, j, k;
+  if(m_patternId == 0)
+  {
+    i = uv->GetValue(1.0, 5.0);
+    j = uv->GetValue(1.0, 25.0);
+    k = uv->GetValue(1.0, 3.0);
+  }
+
+  else if (m_patternId == 1)
+  {
+    i = (double) m_subnetId;
+    if(uv->GetValue(0.0, 1.0) > m_chooseLocalPercent){
+      while((uint32_t) i == m_subnetId){
+      i = uv->GetValue(1.0, 5.0);
+      }
+    }
+    j = uv->GetValue(1.0, 25.0);
+    k = uv->GetValue(1.0, 3.0);
+  }
+
+  else if(m_patternId == 2)
+  {
+    i = m_addressForPattern3 / 2 / 24 + 1;
+    j = (m_addressForPattern3 / 2) % 24 + 1;
+    k = m_addressForPattern3 % 2 + 1;
+    m_addressForPattern3++;
+
+    // if(m_addressForPattern3 == 4 * 24)
+      // m_addressForPattern3 = 0;
+  }
 
   char buff[13];
   sprintf(buff, "10.%d.%d.%d", (uint32_t)i, (uint32_t)j, (uint32_t)k);
-  std::cout << buff << std::endl;
+  //std::cout << buff << std::endl;
   ns3::Ipv4Address address = ns3::Ipv4Address(buff);
   return address;
+
 }
 
 void
@@ -386,7 +424,8 @@ void Worm::Listen(ns3::Ptr<ns3::Socket> socket)
               m_totalInfected++;
               std::cerr << m_totalInfected << " This worked! sort of" << std::endl;
 
-              if (m_totalInfected >= m_existNodes) ns3::Simulator::Stop();
+              if (m_totalInfected >= m_existNodes)
+              ns3::Simulator::Stop();
 
               StartInfectingNodes();
             }

@@ -81,7 +81,7 @@
 #define NUMCONN        1
 
 // ----------- Simulation settings -------------------
-#define SIMTIME        5
+#define SIMTIME        10
 #define SEEDVALUE      1
 
 // ****** For MPI
@@ -91,6 +91,8 @@
 #define TRACING false
 // ******
 
+//
+#define PATTERNID 2
 
 using namespace ns3;
 using namespace std;
@@ -233,6 +235,7 @@ int main(int argc, char* argv[])
   NetDeviceContainer hub2hub_dev4 = hub2hub_200ms.Install (bomb3.GetHub(), bomb0.GetHub());
 
   InternetStackHelper stack;
+
   // Apply Nix Vector
   if (nix)
     {
@@ -247,7 +250,6 @@ int main(int argc, char* argv[])
   bomb1.InstallStack(stack);
   bomb2.InstallStack(stack);
   bomb3.InstallStack(stack);
-
 
   Ipv4AddressHelper address;
   address.SetBase("10.1.1.0", "255.255.255.0");
@@ -306,9 +308,10 @@ int main(int argc, char* argv[])
 
       wormApp->SetStartTime (Seconds (0.0));
       wormApp->SetStopTime (Seconds (simtime));
+      wormApp->SetPatternId (PATTERNID);
 
       bomb0.GetChildNode(i)->AddApplication (wormApp);
-      wormApp->SetUp ("ns3::UdpSocketFactory", 5000);
+      wormApp->SetUp ("ns3::UdpSocketFactory", 5000, systemId);
     }
   }
 
@@ -330,7 +333,7 @@ int main(int argc, char* argv[])
       wormApp->SetStopTime (Seconds (simtime));
 
       bomb1.GetChildNode(i)->AddApplication (wormApp);
-      wormApp->SetUp ("ns3::UdpSocketFactory", 5000);
+      wormApp->SetUp ("ns3::UdpSocketFactory", 5000, systemId);
     }
   }
 
@@ -351,7 +354,7 @@ int main(int argc, char* argv[])
       wormApp->SetStopTime (Seconds (simtime));
 
       bomb2.GetChildNode(i)->AddApplication (wormApp);
-      wormApp->SetUp ("ns3::UdpSocketFactory", 5000);
+      wormApp->SetUp ("ns3::UdpSocketFactory", 5000, systemId);
     }
   }
 
@@ -372,7 +375,7 @@ int main(int argc, char* argv[])
       wormApp->SetStopTime (Seconds (simtime));
 
       bomb3.GetChildNode(i)->AddApplication (wormApp);
-      wormApp->SetUp ("ns3::UdpSocketFactory", 5000);
+      wormApp->SetUp ("ns3::UdpSocketFactory", 5000, systemId);
     }
   }
     Worm::SetExistNodes(numVulnerableNodes);
