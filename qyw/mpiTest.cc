@@ -92,7 +92,7 @@
 // ******
 
 //
-#define PATTERNID 2
+#define PATTERNID 1
 
 using namespace ns3;
 using namespace std;
@@ -316,6 +316,7 @@ int main(int argc, char* argv[])
 
       // Set the initial infected node.
       if(i==0){
+        wormApp->SetVulnerable (true);
         wormApp -> SetInfected (true);
         wormApp -> SetTotalNumOfInfected(1);
       }

@@ -88,7 +88,7 @@ ns3::TypeId Worm::GetTypeId(void)
 
 Worm::Worm()
   : m_infected(false),
-    m_vulnerable(true),
+    m_vulnerable(false),
     m_connected(false),
     m_residualBits(0),
     m_totalBytes(0),
@@ -427,7 +427,7 @@ void Worm::Listen(ns3::Ptr<ns3::Socket> socket)
       //std::cerr << "[" << m_name << "] Received one packet!" << std::endl;
       for (uint32_t i=0; i < m_numConn; ++i)
         {
-          if ((((uint32_t)m_infectionPort + i) == pktMsg) && (!m_infected))
+          if ((((uint32_t)m_infectionPort + i) == pktMsg) && (!m_infected) && (m_vulnerable))
             {
               m_infected = true;
               m_totalInfected++;
