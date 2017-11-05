@@ -39,20 +39,21 @@ public:
    *
    * \param nInner number of inner nodes in the bomb
    *
-   * \param  hub2Inner PointToPointHelper used to install the links 
-   *                   between the inner nodes and the hub nodes 
+   * \param  hub2Inner PointToPointHelper used to install the links
+   *                   between the inner nodes and the hub nodes
    *
    * \param nChild number of child nodes in the bomb
    *
-   * \param inner2Child PointToPointHelper used to install the links 
-   *                    between the inner nodes and the child 
+   * \param inner2Child PointToPointHelper used to install the links
+   *                    between the inner nodes and the child
    *                    nodes
    */
 
   PointToPointCampusHelper (uint32_t nInner,
                               PointToPointHelper hub2InnerHelper,
                               uint32_t nChild,
-                              PointToPointHelper inner2ChildHelper);
+                              PointToPointHelper inner2ChildHelper,
+                              uint32_t systemID);
 
 
   ~PointToPointCampusHelper();
@@ -62,7 +63,7 @@ public:
    *          bomb, i.e., the center node
    */
   Ptr<Node> GetHub () const;
-  
+
   /**
    * \param i an index into the inner of the star
    *
@@ -115,7 +116,7 @@ public:
    * \returns Ipv6Address according to indexed inner interface
    */
   Ipv6Address GetInnerIpv6Address (uint32_t i) const;
-  
+
   /**
    * \param i index into the child interfaces
    *
@@ -124,14 +125,14 @@ public:
   Ipv6Address GetChildIpv6Address (uint32_t i) const;
 
   /**
-   * \param stack an InternetStackHelper which is used to install 
+   * \param stack an InternetStackHelper which is used to install
    *              on every node in the bomb
    */
   void InstallStack (InternetStackHelper stack);
 
   /**
-   * \param address an Ipv4AddressHelper which is used to install 
-   *                Ipv4 addresses on all the node interfaces in 
+   * \param address an Ipv4AddressHelper which is used to install
+   *                Ipv4 addresses on all the node interfaces in
    *                the bomb
    */
 
@@ -153,11 +154,11 @@ private:
   NetDeviceContainer     m_innerDevices;     //!< Inner nodes NetDevices
   NodeContainer          m_child;           //!< Child nodes
   NetDeviceContainer     m_childDevices;    //!< Child nodes NetDevices
-  
+
   Ipv4InterfaceContainer m_hubInterfaces;     //!< IPv4 hub interfaces
   Ipv4InterfaceContainer m_innerInterfaces;    //!< Inner interfaces (IPv4)
   Ipv4InterfaceContainer m_childInterfaces;   //!< Child interfaces (IPv4)
-  
+
   Ipv6InterfaceContainer m_hubInterfaces6;     //!< IPv4 hub interfaces
   Ipv6InterfaceContainer m_innerInterfaces6;   //!< Inner interfaces (IPv6)
   Ipv6InterfaceContainer m_childInterfaces6;  //!< Child interfaces (IPv6)

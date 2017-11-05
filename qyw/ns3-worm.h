@@ -30,7 +30,7 @@ public:
     Worm();
     ~Worm();
 
-    void SetUp(std::string protocol, uint32_t infectionPort);
+    void SetUp(std::string protocol, uint32_t infectionPort, uint32_t subnetId);
 
     ns3::Ipv4Address guessIP(void);
 
@@ -40,12 +40,15 @@ public:
     void SetVulnerable(bool vulnerable);
     void SetName(std::string name);
 
+    void SetTotalNumOfInfected (uint32_t num);
+
     static void SetX (uint32_t xInt);
     static void SetY (uint32_t yInt);
     static void SetTotalNodes (uint32_t totalNodes);
     static void SetExistNodes (uint32_t existNodes);
     static void SetNumConn (uint32_t numConn);
     static void SetPacketSize (uint32_t pktSize);
+    static void SetPatternId (uint32_t patternId);
     static uint32_t GetTotalNodes ();
     static uint32_t GetExistNodes ();
     static uint32_t GetInfectedNodes ();
@@ -61,16 +64,20 @@ protected:
     static uint32_t m_existNodes;
     static uint32_t m_numConn;
     static std::vector<int> m_curInfected;
+    static double m_chooseLocalPercent;
 
     bool m_infected;
     bool m_vulnerable;
     bool m_connected;
 
     uint16_t m_infectionPort;
+    uint32_t m_subnetId;
     static uint32_t m_pktSize;
     uint32_t m_maxBytes;
     uint32_t m_residualBits; //!< Number of generated, but not sent, bits
     uint32_t m_totalBytes;
+    uint32_t m_addressForPattern3;
+    static uint32_t m_patternId;
     ns3::Time m_lastStartTime;
 
 
