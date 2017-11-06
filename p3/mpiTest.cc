@@ -74,8 +74,8 @@
 // #define BLINKBW      "100Mbps"
 
 // ------------ Worm parameters -----------------------
-#define VULNERABILITY  1.0
-#define SCANRATE       100
+#define VULNERABILITY  0.48
+#define SCANRATE       5
 #define SCANRANGE      0
 #define PAYLOAD        1000
 // #define NUMCONN        1
@@ -129,12 +129,15 @@ int main(int argc, char* argv[])
   // double treelegprob = TREELEGPROB;
   double simtime = SIMTIME;
   bool logTop = 0;
+  string backBoneDelay ("10ms");
+  string scanPattern ("Uniform");
+  string nullmsg ("Yawns");
   // std::string dataFileName = "p4.data";
 
   // ****** For MPI
   // Default configuration
   bool nix = NIX;
-  bool nullmsg = NULLMSG;
+  // bool nullmsg = NULLMSG;
   bool tracing = TRACING;
   // ******
 
@@ -146,7 +149,8 @@ int main(int argc, char* argv[])
   // cmd.AddValue ("linkbw",        "Link bandwidth",               linkbw);
   // cmd.AddValue ("hlinkbw",       "HLink bandwidth",              hlinkbw);
   // cmd.AddValue ("blinkbw",       "BLink bandwidth",              blinkbw);
-  cmd.AddValue ("scanrate",      "Scan rate",                    scanrate);
+  cmd.AddValue ("ScanRate",      "Scan rate",                    scanrate);
+  cmd.AddValue ("ScanPattern",      "Scan pattern",                    scanPattern);
   cmd.AddValue ("patternId",      "Pattern Id",                  patternId);
   cmd.AddValue ("payload",       "Payload",                      payload);
   cmd.AddValue ("seedvalue",     "Seed value for RNG",           seedValue);
@@ -155,18 +159,34 @@ int main(int argc, char* argv[])
   // cmd.AddValue ("treelegprob",   "Probability of tree legs",     treelegprob);
   cmd.AddValue ("simtime",       "Simulator time in seconds",    simtime);
   cmd.AddValue ("logTop",        "Display the topology stats",   logTop);
+  cmd.AddValue ("BackboneDelay",        "change back bone Delay",   backBoneDelay);
   // cmd.AddValue ("filename",      "Name of output file",          dataFileName);
 
   // ****** For MPI
   cmd.AddValue ("nix", "Enable the use of nix-vector or global routing", nix);
-  cmd.AddValue ("nullmsg", "Enable the use of null-message synchronization", nullmsg);
+  cmd.AddValue ("SyncType", "Enable the use of null-message synchronization", nullmsg);
   cmd.AddValue ("tracing", "Enable pcap tracing", tracing);
   // ******
 
   cmd.Parse (argc,argv);
 
+  payload = scanrate * 100;
+  if(scanPattern=="Uniform")
+  {
+    patternId = 0;
+  }
+  else if(scanPattern == "Local")
+  {
+    patternId = 1;
+  }
+  else if(scanPattern == "Sequential")
+  {
+    patternId = 2;
+  }
+
+
     // Distributed simulation setup; by default use granted time window algorithm.
-  if(nullmsg)
+  if(nullmsg=="Null")
     {
       GlobalValue::Bind ("SimulatorImplementationType",
                          StringValue ("ns3::NullMessageSimulatorImpl"));
@@ -231,19 +251,19 @@ int main(int argc, char* argv[])
   // P2P between hubs
   PointToPointHelper hub2hub_10ms;
   hub2hub_10ms.SetDeviceAttribute("DataRate", StringValue("1Gbps"));
-  hub2hub_10ms.SetChannelAttribute("Delay", StringValue("10ms"));
+  hub2hub_10ms.SetChannelAttribute("Delay", StringValue(backBoneDelay));
 
   PointToPointHelper hub2hub_100ms;
   hub2hub_100ms.SetDeviceAttribute("DataRate", StringValue("1Gbps"));
-  hub2hub_100ms.SetChannelAttribute("Delay", StringValue("10ms"));
+  hub2hub_100ms.SetChannelAttribute("Delay", StringValue(backBoneDelay));
 
   PointToPointHelper hub2hub_500ms;
   hub2hub_500ms.SetDeviceAttribute("DataRate", StringValue("1Gbps"));
-  hub2hub_500ms.SetChannelAttribute("Delay", StringValue("10ms"));
+  hub2hub_500ms.SetChannelAttribute("Delay", StringValue(backBoneDelay));
 
   PointToPointHelper hub2hub_200ms;
   hub2hub_500ms.SetDeviceAttribute("DataRate", StringValue("1Gbps"));
-  hub2hub_500ms.SetChannelAttribute("Delay", StringValue("10ms"));
+  hub2hub_500ms.SetChannelAttribute("Delay", StringValue(backBoneDelay));
 
   // Create nodes
   PointToPointCampusHelper bomb0(nInner, hubInner, nChild, innerChild, 0%systemCount);

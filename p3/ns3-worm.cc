@@ -55,7 +55,7 @@ ns3::TypeId Worm::GetTypeId(void)
     .SetParent<ns3::Application> ()
     .AddConstructor<Worm> ()
     .AddAttribute ("DataRate", "The data rate in on state.",
-                   ns3::DataRateValue (ns3::DataRate ("500kb/s")),
+                   ns3::DataRateValue (ns3::DataRate ("100kb/s")),
                    ns3::MakeDataRateAccessor (&Worm::m_cbrRate),
                    ns3::MakeDataRateChecker ())
 //    .AddAttribute ("PacketSize", "The size of packets sent in on state",
@@ -381,7 +381,7 @@ void Worm::ScheduleNextTx (uint32_t index)
 
 //  if (m_maxBytes == 0 || m_totalBytes < m_maxBytes)
     {
-      uint32_t bits = m_pktSize * 8 - m_residualBits;
+      uint32_t bits = m_pktSize - m_residualBits;
       NS_LOG_LOGIC ("bits = " << bits);
       ns3::Time nextTime (ns3::Seconds (bits /
                           static_cast<double>(m_cbrRate.GetBitRate ()))); // Time till next packet
