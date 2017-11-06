@@ -239,7 +239,7 @@ void Worm::SendPacket(uint32_t index)
 }
 
 void Worm::ConnectionSucceeded(ns3::Ptr<ns3::Socket> socket)
-{  
+{
   NS_LOG_FUNCTION (this << socket);
   m_connected = true;
 }
@@ -354,7 +354,7 @@ void Worm::StartInfectingNodes()
     }
 
     ns3::Simulator::Schedule(ns3::Seconds(2.0),&Worm::StartInfectingNodes, this);
-  std::cerr << "end infection" << std::endl;
+  // std::cerr << "end infection" << std::endl;
 }
 
 void Worm::StopApplication()     // Called at time specified by Stop
