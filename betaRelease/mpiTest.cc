@@ -1,26 +1,12 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 /*
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation;
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *
- * Author: Aderinola Gbade-Alabi <aagbade@gmail.com>
- *         Jared S. Ivey         <jivey@gatech.edu>
- *         Drew Petry            <drew.petry@gatech.edu>
- *         Peter Vieira          <pete.vieira@gmail.com>
- *
- */
-
+author :
+  Wenxin Fang
+  Xingyu Liu
+  Nan Li
+  Xueyang XU
+  Yunwei Qiang
+*/
 #include <iostream>
 #include <stdio.h>
 #include <string>
@@ -62,36 +48,15 @@
 // #define TCPWORMTYPE  1
 #define UDPWORMTYPE  2
 #define WORMTYPE     UDPWORMTYPE
-
-// ------------ Define the topology  ---------------
-// #define TREES        4
-// #define FANOUT1      8
-// #define FANOUT2      16
-// #define TREELEGPROB  0.85
-
-// #define LINKBW       "1Mbps"
-// #define HLINKBW      "10Mbps"
-// #define BLINKBW      "100Mbps"
-
-// ------------ Worm parameters -----------------------
 #define VULNERABILITY  0.48
 #define SCANRATE       5
 #define SCANRANGE      0
 #define PAYLOAD        1000
-// #define NUMCONN        1
-
-// ----------- Simulation settings -------------------
 #define SIMTIME        5
 #define SEEDVALUE      1
-
-// ****** For MPI
-// ----------- MPI settings -------------------
 #define NIX true
 #define NULLMSG false
 #define TRACING false
-// ******
-
-//
 #define PATTERNID 1
 
 using namespace ns3;
@@ -103,64 +68,36 @@ typedef struct timeval TIMER_TYPE;
 
 int main(int argc, char* argv[])
 {
-// ****** For MPI
 #ifdef NS3_MPI
-// ******
   TIMER_TYPE t0, t1, t2;
   TIMER_NOW (t0);
 
 
   GlobalValue::Bind ("SimulatorImplementationType",
-    StringValue ("ns3::DistributedSimulatorImpl"));
-  
-  // uint32_t wormtype = WORMTYPE;
-  // uint32_t nt = TREES;
-  // uint32_t nf1 = FANOUT1;
-  // uint32_t nf2 = FANOUT2;
-  // string linkbw  = LINKBW;
-  // string hlinkbw = HLINKBW;
-  // string blinkbw = BLINKBW;
+  StringValue ("ns3::DistributedSimulatorImpl"));
   uint32_t scanrate = SCANRATE;
   uint32_t patternId = PATTERNID;
   uint32_t payload = PAYLOAD;
   uint32_t seedValue = SEEDVALUE;
-  // uint32_t numConn = NUMCONN;
   double vulnerability = VULNERABILITY;
-  // double treelegprob = TREELEGPROB;
   double simtime = SIMTIME;
   bool logTop = 0;
   string backBoneDelay ("10ms");
   string scanPattern ("Uniform");
   string nullmsg ("Yawns");
-  // std::string dataFileName = "p4.data";
-
-  // ****** For MPI
-  // Default configuration
   bool nix = NIX;
-  // bool nullmsg = NULLMSG;
   bool tracing = TRACING;
-  // ******
 
   CommandLine cmd;
-  // cmd.AddValue ("wormtype",      "Type of worm: UDP or TCP",     wormtype);
-  // cmd.AddValue ("trees",         "Number of trees",              nt);
-  // cmd.AddValue ("fanout1",       "First fanout of trees",        nf1);
-  // cmd.AddValue ("fanout2",       "Second fanout of trees",       nf2);
-  // cmd.AddValue ("linkbw",        "Link bandwidth",               linkbw);
-  // cmd.AddValue ("hlinkbw",       "HLink bandwidth",              hlinkbw);
-  // cmd.AddValue ("blinkbw",       "BLink bandwidth",              blinkbw);
   cmd.AddValue ("ScanRate",      "Scan rate",                    scanrate);
   cmd.AddValue ("ScanPattern",      "Scan pattern",                    scanPattern);
   cmd.AddValue ("patternId",      "Pattern Id",                  patternId);
   cmd.AddValue ("payload",       "Payload",                      payload);
   cmd.AddValue ("seedvalue",     "Seed value for RNG",           seedValue);
   cmd.AddValue ("vulnerability", "Vulnerability to infection",   vulnerability);
-  // cmd.AddValue ("numConn",       "Number of TCP connections",    numConn);
-  // cmd.AddValue ("treelegprob",   "Probability of tree legs",     treelegprob);
   cmd.AddValue ("simtime",       "Simulator time in seconds",    simtime);
   cmd.AddValue ("logTop",        "Display the topology stats",   logTop);
   cmd.AddValue ("BackboneDelay",        "change back bone Delay",   backBoneDelay);
-  // cmd.AddValue ("filename",      "Name of output file",          dataFileName);
 
   // ****** For MPI
   cmd.AddValue ("nix", "Enable the use of nix-vector or global routing", nix);
@@ -185,7 +122,6 @@ int main(int argc, char* argv[])
   }
 
 
-    // Distributed simulation setup; by default use granted time window algorithm.
   if(nullmsg=="Null")
     {
       GlobalValue::Bind ("SimulatorImplementationType",
@@ -201,25 +137,8 @@ int main(int argc, char* argv[])
   //SeedManager::SetSeed ((int) clock());
   Ptr<UniformRandomVariable> uv = CreateObject<UniformRandomVariable> ();
 
-  // Config::SetDefault ("ns3::TcpL4Protocol::SocketType", TypeIdValue (TcpNewReno::GetTypeId ()));
-
-  // ****** For MPI
-  // // Distributed simulation setup; by default use granted time window algorithm.
-  // if(nullmsg)
-  //   {
-  //     GlobalValue::Bind ("SimulatorImplementationType",
-  //                        StringValue ("ns3::NullMessageSimulatorImpl"));
-  //   }
-  // else
-  //   {
-  //     GlobalValue::Bind ("SimulatorImplementationType",
-  //                        StringValue ("ns3::DistributedSimulatorImpl"));
-  //   }
-
   // Enable parallel simulator with the command line arguments
   MpiInterface::Enable (&argc, &argv);
-
-  // LogComponentEnable ("PacketSink", LOG_LEVEL_INFO);
 
   // Get rank and total number of CPUs.
   uint32_t systemId = MpiInterface::GetSystemId ();
@@ -234,8 +153,6 @@ int main(int argc, char* argv[])
   // ******
 
 
-
-  //what I added////////////////////////////////////////////////
   uint32_t nInner = 8;
   uint32_t nChild = 2;
 
@@ -321,12 +238,6 @@ int main(int argc, char* argv[])
 
   // address.SetBase("10.8.1.0", "255.255.255.0");
   // Ipv4InterfaceContainer hub2hub_inter4 = address.Assign(hub2hub_dev4);
-
-  // ApplicationContainer wormApps; // ???
-  // Worm::SetX (1 + nInner);
-  // Worm::SetY (nInner * nChild);
-  // Worm::SetTotalNodes (nInner * nChild);
-  //Worm::SetNumConn(numConn);
   Worm::SetPacketSize(payload);
   uint32_t numVulnerableNodes = 0;
 
@@ -335,7 +246,6 @@ int main(int argc, char* argv[])
     for(uint32_t i=0; i < nChild * nInner; i++)
     {
       Ptr<Worm> wormApp = CreateObject<Worm> ();
-      //wormApp->SetMaxBytes(50000);
 
       if (uv->GetValue(0.0, 1.0) <= vulnerability) {
         wormApp->SetVulnerable (true);
@@ -367,7 +277,6 @@ int main(int argc, char* argv[])
     for(uint32_t i=0; i < nChild * nInner; i++)
     {
       Ptr<Worm> wormApp = CreateObject<Worm> ();
-      //wormApp->SetMaxBytes(50000);
 
       if (uv->GetValue(0.0, 1.0) <= vulnerability) {
         wormApp->SetVulnerable (true);
@@ -377,7 +286,6 @@ int main(int argc, char* argv[])
       std::string temp1 = "b" + std::to_string(i) + " " + std::to_string(systemId);
       wormApp->SetName(temp1);
       wormApp->SetSysId(systemId);
-
 
       wormApp->SetStartTime (Seconds (0.0));
       wormApp->SetStopTime (Seconds (simtime));
@@ -390,7 +298,6 @@ int main(int argc, char* argv[])
   if(systemId == 2%systemCount){
     for(uint32_t i=0; i < nChild * nInner; i++){
       Ptr<Worm> wormApp = CreateObject<Worm> ();
-      //wormApp->SetMaxBytes(50000);
 
       if (uv->GetValue(0.0, 1.0) <= vulnerability) {
         wormApp->SetVulnerable (true);
@@ -400,7 +307,6 @@ int main(int argc, char* argv[])
       std::string temp1 = "c" + std::to_string(i) + " " + std::to_string(systemId);
       wormApp->SetName(temp1);
       wormApp->SetSysId(systemId);
-
 
       wormApp->SetStartTime (Seconds (0.0));
       wormApp->SetStopTime (Seconds (simtime));
@@ -413,7 +319,6 @@ int main(int argc, char* argv[])
   if(systemId == 3%systemCount){
     for(uint32_t i=0; i < nChild * nInner; i++){
       Ptr<Worm> wormApp = CreateObject<Worm> ();
-      //wormApp->SetMaxBytes(50000);
 
       if (uv->GetValue(0.0, 1.0) <= vulnerability) {
         wormApp->SetVulnerable (true);
@@ -431,7 +336,6 @@ int main(int argc, char* argv[])
       wormApp->SetUp ("ns3::UdpSocketFactory", 5000, systemId);
     }
   }
-    // Worm::SetExistNodes(numVulnerableNodes);
 
 /////////////////////////////////////////////////////////////////////
 
@@ -446,12 +350,10 @@ int main(int argc, char* argv[])
     std::cout << "Using IPv4 Routing!" << std::endl;
     Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
   }
-  // Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
   TIMER_NOW (t1);
 
   std::cerr << "actually running" << std::endl;
-  // if (simtime != 0)
-    Simulator::Stop(Seconds(simtime));
+  Simulator::Stop(Seconds(simtime));
   Simulator::Run();
   TIMER_NOW (t2);
 
@@ -473,30 +375,6 @@ int main(int argc, char* argv[])
     infectionArray.push_back(Worm::GetInfectedNodes());
   }
 
-  //-------------------------
-  //    WRITE DATA TO FILE
-  //-------------------------
-  //"#Nodes %Vul %Inf #inf #Conn Time"
-  // Write results to data file
-  // std::ofstream dataFile;
-  // dataFile.open(dataFileName.c_str(), std::fstream::out | std::fstream::app);
-  // assert(dataFile.is_open());
-  // dataFile << "0.0" << "\t"
-  //          << Worm::GetInfectedNodes() << "\t"
-  //          << numVulnerableNodes << "\t"
-  //          << percVulnerable << "\t"
-  //          << percInfected << "\t"
-  //          << Worm::GetNumConn() << "\t"
-  //          << payload << "\t"
-  //          << "\n";
-  // for (size_t i = 0; i < infectionArray.size(); ++i) {
-  //     dataFile << (float)i*0.1 << "\t"
-  //              << infectionArray.at(i) << "\t"
-  //              << "\n";
-  // }
-  // dataFile  << "\n";
-  // dataFile.close();
-  //flowmon->SerializeToXmlFile ("p4.flowmon", false, false);
   Simulator::Destroy();
 
   // ****** For MPI
