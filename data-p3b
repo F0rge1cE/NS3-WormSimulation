@@ -1,0 +1,278 @@
+// BackbonDelay = 10ms 20ms 50ms  100ms  200ms 500ms
+
+mpirun -np 4 ./waf --run "betaRelease --ScanRate=5 --ScanPattern=Uniform BackbonDelay=10ms --SyncType=Yawns"
+-----
+Runtime Stats:
+-----
+Runtime Stats:
+Simulator init time: 0.263511
+Simulator init time: 0.265473
+Simulator run time: 6.81088
+Total elapsed time: 7.07635
+Simulator run time: 6.82678
+Total elapsed time: 7.09029
+-----
+Runtime Stats:
+Simulator init time: 0.258027
+Simulator run time: 6.83212
+Total elapsed time: 7.09015
+-----
+Runtime Stats:
+Simulator init time: 0.276756
+Simulator run time: 6.81657
+Total elapsed time: 7.09333
+
+
+mpirun -np 4 ./waf --run "betaRelease --ScanRate=5 --ScanPattern=Uniform BackbonDelay=20ms --SyncType=Yawns"
+-----
+Runtime Stats:
+Simulator init time: 0.229798
+Simulator run time: 7.67979
+Total elapsed time: 7.90959
+-----
+Runtime Stats:
+Simulator init time: 0.253927
+Simulator run time: 7.67505
+Total elapsed time: 7.92897
+-----
+Runtime Stats:
+Simulator init time: 0.297726
+Simulator run time: 7.6734
+Total elapsed time: 7.97113
+-----
+Runtime Stats:
+Simulator init time: 0.300132
+Simulator run time: 7.67985
+Total elapsed time: 7.97998
+
+
+mpirun -np 4 ./waf --run "betaRelease --ScanRate=5 --ScanPattern=Uniform BackbonDelay=50ms --SyncType=Yawns"
+-----
+Runtime Stats:
+Simulator init time: 0.279207
+Simulator run time: 7.76552
+Total elapsed time: 8.04473
+-----
+Runtime Stats:
+Simulator init time: 0.477469
+Simulator run time: 7.70517
+Total elapsed time: 8.18264
+-----
+Runtime Stats:
+Simulator init time: 0.454663
+Simulator run time: 7.69692
+Total elapsed time: 8.15158
+-----
+Runtime Stats:
+Simulator init time: 0.350991
+Simulator run time: 7.75815
+Total elapsed time: 8.10914
+
+
+mpirun -np 4 ./waf --run "betaRelease --ScanRate=5 --ScanPattern=Uniform BackbonDelay=100ms --SyncType=Yawns"
+-----
+Runtime Stats:
+Simulator init time: 0.270425
+Simulator run time: 7.05224
+Total elapsed time: 7.32266
+-----
+Runtime Stats:
+Simulator init time: 0.286779
+Simulator run time: 7.06393
+Total elapsed time: 7.35071
+-----
+Runtime Stats:
+Simulator init time: 0.246307
+Simulator run time: 7.06909
+Total elapsed time: 7.3154
+-----
+Runtime Stats:
+Simulator init time: 0.258493
+Simulator run time: 7.04966
+Total elapsed time: 7.30815
+
+
+mpirun -np 4 ./waf --run "betaRelease --ScanRate=5 --ScanPattern=Uniform BackbonDelay=200ms --SyncType=Yawns"
+-----
+Runtime Stats:
+Simulator init time: 0.234763
+Simulator run time: 6.65765
+Total elapsed time: 6.89242
+-----
+Runtime Stats:
+Simulator init time: 0.275296
+Simulator run time: 6.65959
+Total elapsed time: 6.93489
+-----
+Runtime Stats:
+Simulator init time: 0.269435
+Simulator run time: 6.65933
+Total elapsed time: 6.92876
+-----
+Runtime Stats:
+Simulator init time: 0.259888
+Simulator run time: 6.64746
+Total elapsed time: 6.90735
+
+
+mpirun -np 4 ./waf --run "betaRelease --ScanRate=5 --ScanPattern=Uniform BackbonDelay=500ms --SyncType=Yawns"
+-----
+Runtime Stats:
+Simulator init time: 0.252512
+Simulator run time: 7.01698
+Total elapsed time: 7.26949
+-----
+Runtime Stats:
+Simulator init time: 0.263357
+Simulator run time: 7.02436
+Total elapsed time: 7.28772
+-----
+Runtime Stats:
+Simulator init time: 0.256313
+Simulator run time: 7.02463
+Total elapsed time: 7.28094
+-----
+Runtime Stats:
+Simulator init time: 0.250379
+Simulator run time: 7.01882
+Total elapsed time: 7.2692
+
+
+/***********************************************************/
+mpirun -np 4 ./waf --run "betaRelease --ScanRate=5 --ScanPattern=Uniform BackbonDelay=10ms --SyncType=Null"
+-----
+Runtime Stats:
+Simulator init time: 0.40384
+Simulator run time: 8.49671
+Total elapsed time: 8.90055
+-----
+Runtime Stats:
+Simulator init time: 0.314545
+Simulator run time: 8.50552
+Total elapsed time: 8.82006
+-----
+Runtime Stats:
+Simulator init time: 0.341235
+Simulator run time: 8.4643
+Total elapsed time: 8.80554
+-----
+Runtime Stats:
+Simulator init time: 0.317588
+Simulator run time: 8.4983
+Total elapsed time: 8.81589
+
+
+mpirun -np 4 ./waf --run "betaRelease --ScanRate=5 --ScanPattern=Uniform BackbonDelay=20ms --SyncType=Null"
+-----
+Runtime Stats:
+Simulator init time: 0.283124
+Simulator run time: 7.87537
+Total elapsed time: 8.1585
+-----
+Runtime Stats:
+Simulator init time: 0.308188
+Simulator run time: 7.89091
+Total elapsed time: 8.1991
+-----
+Runtime Stats:
+Simulator init time: 0.283655
+Simulator run time: 7.9038
+Total elapsed time: 8.18746
+-----
+Runtime Stats:
+Simulator init time: 0.263068
+Simulator run time: 7.91885
+Total elapsed time: 8.18192
+
+
+mpirun -np 4 ./waf --run "betaRelease --ScanRate=5 --ScanPattern=Uniform BackbonDelay=50ms --SyncType=Null"
+-----
+Runtime Stats:
+Simulator init time: 0.292211
+Simulator run time: 7.13432
+Total elapsed time: 7.42654
+-----
+Runtime Stats:
+Simulator init time: 0.254047
+Simulator run time: 7.15669
+Total elapsed time: 7.41074
+-----
+Runtime Stats:
+Simulator init time: 0.261138
+Simulator run time: 7.16996
+Total elapsed time: 7.4311
+-----
+Runtime Stats:
+Simulator init time: 0.284595
+Simulator run time: 7.15375
+Total elapsed time: 7.43834
+
+
+mpirun -np 4 ./waf --run "betaRelease --ScanRate=5 --ScanPattern=Uniform BackbonDelay=100ms --SyncType=Null"
+-----
+Runtime Stats:
+Simulator init time: 0.287761
+Simulator run time: 6.83222
+Total elapsed time: 7.11998
+-----
+Runtime Stats:
+Simulator init time: 0.357395
+Simulator run time: 6.84109
+Total elapsed time: 7.19849
+-----
+Runtime Stats:
+Simulator init time: 0.284205
+Simulator run time: 6.84178
+Total elapsed time: 7.12598
+-----
+Runtime Stats:
+Simulator init time: 0.318363
+Simulator run time: 6.82956
+Total elapsed time: 7.14793
+
+
+mpirun -np 4 ./waf --run "betaRelease --ScanRate=5 --ScanPattern=Uniform BackbonDelay=200ms --SyncType=Null"
+-----
+Runtime Stats:
+Simulator init time: 0.251222
+Simulator run time: 7.47775
+Total elapsed time: 7.72897
+-----
+Runtime Stats:
+Simulator init time: 0.258184
+Simulator run time: 7.49814
+Total elapsed time: 7.75633
+-----
+Runtime Stats:
+Simulator init time: 0.271672
+Simulator run time: 7.5121
+Total elapsed time: 7.78377
+-----
+Runtime Stats:
+Simulator init time: 0.296972
+Simulator run time: 7.49675
+Total elapsed time: 7.79372
+
+
+mpirun -np 4 ./waf --run "betaRelease --ScanRate=5 --ScanPattern=Uniform BackbonDelay=500ms --SyncType=Null"
+-----
+Runtime Stats:
+Simulator init time: 0.262018
+Simulator run time: 7.44097
+Total elapsed time: 7.70299
+-----
+Runtime Stats:
+Simulator init time: 0.281613
+Simulator run time: 7.4645
+Total elapsed time: 7.74611
+-----
+Runtime Stats:
+Simulator init time: 0.29714
+Simulator run time: 7.46505
+Total elapsed time: 7.76219
+-----
+Runtime Stats:
+Simulator init time: 0.239843
+Simulator run time: 7.478
+Total elapsed time: 7.71784
+data
